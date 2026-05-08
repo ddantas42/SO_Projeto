@@ -1,0 +1,137 @@
+PROJETO SO – FASE 1 (SEM INTERNET)
+
+As respostas devem ser escritas apenas dentro dos parêntesis retos => [Resposta]
+
+========================================
+IDENTIFICAÇÃO
+========================================
+
+Grupo: [13869, 15040, 15044]
+
+========================================
+1. DESCRIÇÃO DO PROBLEMA
+========================================
+
+Faça um resumo do problema que pretende resolver:
+
+[Gerir uma estação robótica autónoma que tem como finalidade a recolha e análise de amostras do solo de Marte.]
+
+========================================
+2. MODELAÇÃO DO SISTEMA
+========================================
+
+Entidades identificadas e como serão implementadas (processo, thread, outro):
+
+[
+     ------------------
+
+    Entidade 1: Módulo principal
+    Implementação 1: Process
+    Justificação 1: Sendo o programa incial precisa de ser um processo
+
+    ------------------
+
+    Entidade 2: Módulo de exploração
+    Implementação 2: Process
+    Justificação 2: Sendo um modulo que irá gerir os drones criando o thread, irá ser um processo
+
+    ------------------
+
+    Entidade 3: Módulo de Análise Científica
+    Implementação 3: Process
+    Justificação 3: Sendo um modulo independente, terá de ser um processo. Pois vai gerir os braços robóticos.
+
+    ------------------
+
+	Entidade 4: Drone
+	Implementação 4: Thread
+	Justificação 4: Cada drone vai ter a sua autonomia executando processos independentes.
+
+   -------------------
+
+	Entidade 5: Aparelho Análise
+	Implementação 5: Process
+	Justificação 5: vai gerir os braços
+
+    -------------------
+
+	Entidade 6: Braço robótico (Aparelho)
+	Implementação 6: Thread
+	Justificação 6: cada braco vai retirar uma amostra de cada vez
+
+]
+
+========================================
+3. PARTILHA DE DADOS
+========================================
+
+Há necessidade de partilha de recursos? Quais?
+
+[Sim, o espaço do tabuleiro (máx. 10)...]
+
+Que opções terá para partilha de dados?
+
+[shm e IPC]
+
+Vai optar por usar memória partilhada?
+[ X ] Sim   [ ] Não
+
+Se sim:
+* Que dados serão partilhados nessa memória partilhada?
+[O tabuleiro das amostras]
+* Como será estruturada essa memória partilhada?
+[O tabuleiro não pode ser acedido por várias entidades ao mesmo tempo.C]
+
+
+========================================
+4. SINCRONIZAÇÃO
+========================================
+
+Que mecanismos serão utilizados e com que objetivo?
+(Semáforos, Mutex, Outros ...)
+
+[
+	Mecanismo 1: Semaforos
+	Objetivo 1: Coordenar os drones a meter as amostras no tabuleiro, para evitar duplicações
+
+	Mecanismo 2: Mutex
+	Objetivo 2: garantir que os braços que apanham a amostra só apanham uma e não a mesma
+
+	Mecanismo 3: Sinais
+	Objetivo 3: para comunicar entre os processos e os threads, fazendo uso do SIGUSR1 e SIGUSR2
+]
+
+---
+
+Que problemas pretende evitar e em que situações?
+(e.g., condições de corrida, deadlocks, starvation)
+
+[Garantir de não deixar nenhum processo zombie, ]
+
+========================================
+6. RISCOS E DIFICULDADES
+========================================
+
+Antecipa que possa surgir algum problema (quais)?
+
+[
+Problema 1: Condições de corrida quando for para retirar ou meter amostras do tabuleiro
+Problema 2: Coordenação de colegas de equipas fazer o código
+...
+]
+
+========================================
+7. DISCUSSÃO
+========================================
+
+Indique o grau de confiança na solução proposta:
+
+[ ] Baixo
+[ ] Médio
+[ X ] Elevado
+
+Justifique:
+[
+	Como não temos qualquer componente prática ainda, é difícil dizer à primeira que não haverão problemas.
+Porém estamos confiantes na nossa habilidade de resolver este projeto :D
+]
