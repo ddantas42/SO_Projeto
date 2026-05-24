@@ -7,6 +7,10 @@
 # include <stdio.h>
 # include <stdlib.h>
 # include <time.h>
+# include <sys/ipc.h>
+# include <sys/shm.h>
+# include <string.h>
+# include <unistd.h>
 
 # include "macros.h"
 
@@ -46,10 +50,13 @@ typedef struct s_sharedboard
 {
 	t_sample samples[STORAGE_CAPACITY];
 	
-	int in;
-	int out;
-	int count;
+	int in; // Índice para o próximo item a ser depositado no tabuleiro
+	int out; // Índice para o próximo item a ser analisado no tabuleiro
+	int count; // Contagem de itens atualmente no tabuleiro
 } t_sharedboard;
 
+
+// init_shm.c
+void initialize_sharedboard(t_sharedboard *board);
 
 #endif

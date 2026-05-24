@@ -1,9 +1,10 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror
+LIBFLAGS = -Isrc/lib
+CFLAGS = -Wall -Wextra -Werror $(LIBFLAGS)
 TARGET = drone
 
 SRCDIR = src/
-SRCFILES = main.c
+SRCFILES = init_shm.c main.c 
 
 SRCS = $(addprefix $(SRCDIR), $(SRCFILES)) 
 OBJS = $(SRCS:.c=.o)

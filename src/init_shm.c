@@ -1,0 +1,45 @@
+#include <projeto.h>
+
+
+static void init_sample(t_sample *sample)
+{
+	sample->collectors_id = rand() % NUMBER_OF_DRONES; // Atribui um ID de coletor aleatório
+	sample->item_type = rand() % ITEM_TYPE_COUNT; // Atribui um tipo de item aleatório
+	clock_gettime(CLOCK_ID, &sample->collected_time); // Registra o tempo de coleta
+	clock_gettime(CLOCK_ID, &sample->deposited_to_table_time); // Registra o tempo de coleta
+	memset(&sample->begin_analising_time, 0, sizeof(struct timespec)); // Inicializa o tempo de início da análise como zero
+	memset(&sample->end_analising_time, 0, sizeof(struct timespec)); // Inicializa o tempo de fim da análise como zero
+}
+
+
+void initialize_sharedboard(t_sharedboard *board)
+{
+	int shmid = -1;
+
+	// Criar uma área de memória compartilhada para o tabuleiro
+	// IPC_PRIVATE indica que a chave é gerada de forma privada
+	// sizeof(t_sharedboard) é o tamanho da memória a ser alocada
+	// IPC_CREAT indica que a memória deve ser criada se não existir, e 0666 são as permissões de leitura e escrita para todos os usuários
+	shmid = shmget(IPC_PRIVATE, sizeof(t_sharedboard), IPC_CREAT | 0666);
+	if (shmid < 0) {
+		perror("shmget");
+		exit(EXIT_FAILURE);
+	}
+
+	// Attaching the shared memory segment to the process's address space
+	board = (t_sharedboard *)shmat(shmid, NULL, 0);
+	if (board == (t_sharedboard *)-1) {
+		perror("shmat");
+		exit(EXIT_FAILURE);
+	}
+
+	// initialize the shared board
+	board->in = 0;
+	board->out = 0;
+	board->count = 0;
+	for (int i = 0; i < STORAGE_CAPACITY; i++)
+		init_sample(&board->samples[i]);
+
+	if (DEBUG)
+		printf("[DEBUG] initialize_sharedboard finished | shmid %d | board %p.\n", shmid, (void *)board);
+}

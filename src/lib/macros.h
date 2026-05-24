@@ -12,6 +12,7 @@
 // CLOCK_REALTIME pode ser usado para obter a hora atual, mas pode ser afetado por mudanças no relógio do sistema
 # define CLOCK_ID CLOCK_MONOTONIC
 
+# define DEBUG 1 // Define como 1 para habilitar mensagens de debug, ou 0 para desabilitar
 
 
 #endif
