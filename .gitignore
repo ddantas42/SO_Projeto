@@ -1,4 +1,8 @@
+# object files
 *.o
 
+# Valgrind output
+valgrind.txt
 
+# Executable
 drone

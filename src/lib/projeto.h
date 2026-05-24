@@ -1,8 +1,55 @@
 #ifndef PROJETO_H
 #define PROJETO_H
 
-#include <stdio.h>
+// Posix.1 requires this to be defined before including any headers to ensure that the correct features are exposed by the system headers.
+# define _POSIX_C_SOURCE 200809L
 
-#include "macros.h"
+# include <stdio.h>
+# include <stdlib.h>
+# include <time.h>
+
+# include "macros.h"
+
+
+enum e_item_type
+{
+	ROCK,
+	DIRT,
+	SAND,
+	OBSIDIAN,
+	WATER,
+	ITEM_TYPE_COUNT
+};
+
+
+/*
+struct timespec
+{
+	time_t tv_sec; // segundos
+	long tv_nsec; // nanosegundos
+};
+*/
+
+typedef struct s_sample
+{
+	int	collectors_id;
+	enum e_item_type 	item_type;
+
+	struct timespec collected_time;
+	struct timespec deposited_to_table_time;
+	struct timespec begin_analising_time;
+	struct timespec end_analising_time;
+
+} t_sample;
+
+typedef struct s_sharedboard
+{
+	t_sample samples[STORAGE_CAPACITY];
+	
+	int in;
+	int out;
+	int count;
+} t_sharedboard;
+
 
 #endif
