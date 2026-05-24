@@ -1,8 +1,10 @@
 # object files
 *.o
 
-# Valgrind output
+# helper files
 valgrind.txt
+to_gpt.txt
+log.txt
 
 # Executable
 drone

@@ -12,6 +12,7 @@
 # include <string.h>
 # include <unistd.h>
 # include <sys/wait.h>
+# include <stdarg.h>
 
 # include "macros.h"
 
@@ -26,6 +27,13 @@ enum e_item_type
 	ITEM_TYPE_COUNT
 };
 
+enum e_log_type
+{
+	DRONE_LOG,
+	ANALISIS_LOG,
+	MAIN_LOG
+};
+
 
 /*
 struct timespec
@@ -38,12 +46,12 @@ struct timespec
 typedef struct s_sample
 {
 	int	collectors_id;
-	enum e_item_type 	item_type;
+	enum e_item_type item_type;
 
-	struct timespec collected_time;
-	struct timespec deposited_to_table_time;
-	struct timespec begin_analising_time;
-	struct timespec end_analising_time;
+	struct timespec	collected_time;
+	struct timespec	deposited_to_table_time;
+	struct timespec	begin_analising_time;
+	struct timespec	end_analising_time;
 
 } t_sample;
 
@@ -54,13 +62,23 @@ typedef struct s_sharedboard
 	int in; // Índice para o próximo item a ser depositado no tabuleiro
 	int out; // Índice para o próximo item a ser analisado no tabuleiro
 	int count; // Contagem de itens atualmente no tabuleiro
+
+	volatile sig_atomic_t stop_signal; // Sinal para indicar que os processos devem parar
 } t_sharedboard;
 
+extern t_sharedboard *board; 
 
 // init_shm.c
 void initialize_sharedboard(t_sharedboard **);
 
 // analisis_process.c
 void analisis_process(t_sharedboard *);
+
+// log.c
+void logger(enum e_log_type type,  const char *format, ...);
+
+// sample.c
+void init_random_sample(t_sample *sample);
+void init_sample(t_sample *sample);
 
 #endif

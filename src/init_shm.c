@@ -1,16 +1,5 @@
 #include <projeto.h>
 
-// initializes sample with default values
-static void init_sample(t_sample *sample)
-{
-	sample->collectors_id = -1;
-	sample->item_type = ITEM_TYPE_COUNT; // Valor inválido para indicar que o tipo do item não foi definido
-	memset(&sample->collected_time, 0, sizeof(struct timespec));
-	memset(&sample->deposited_to_table_time, 0, sizeof(struct timespec));
-	memset(&sample->begin_analising_time, 0, sizeof(struct timespec));
-	memset(&sample->end_analising_time, 0, sizeof(struct timespec));
-}
-
 /*
 	@brief Função para inicializar o tabuleiro compartilhado
 	@param board Ponteiro para o tabuleiro compartilhado a ser inicializado
@@ -37,10 +26,7 @@ void initialize_sharedboard(t_sharedboard **board)
 	}
 
 	// initialize the shared board
-	(*board)->in = 0;
-	(*board)->out = 0;
-	(*board)->count = 0;
-
+	memset(*board, 0, sizeof(t_sharedboard)); // Limpa toda a estrutura para garantir que os valores sejam inicializados corretamente
 	for (int i = 0; i < STORAGE_CAPACITY; i++)
 		init_sample(&(*board)->samples[i]);
 

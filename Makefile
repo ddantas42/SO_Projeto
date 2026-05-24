@@ -4,7 +4,7 @@ CFLAGS = -Wall -Wextra -Werror $(LIBFLAGS)
 TARGET = drone
 
 SRCDIR = src/
-SRCFILES = init_shm.c analisis_process.c main.c 
+SRCFILES = log.c sample.c init_shm.c analisis_process.c main.c 
 
 SRCS = $(addprefix $(SRCDIR), $(SRCFILES)) 
 OBJS = $(SRCS:.c=.o)
