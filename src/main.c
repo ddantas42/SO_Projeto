@@ -10,20 +10,20 @@ void sigint_handler(int signum)
 	}
 }
 
-static void create_analisis_process(t_sharedboard *board, pid_t analisis_pid)
+static void create_analysis_process(t_sharedboard *board, pid_t analysis_pid)
 {
-	if (analisis_pid < 0) // if fork fails
+	if (analysis_pid < 0) // if fork fails
 	{
 		perror("fork");
 		exit(EXIT_FAILURE);
 	}
-	if (analisis_pid == 0) // if we are in the child process
+	if (analysis_pid == 0) // if we are in the child process
 	{
 		if (DEBUG)
 			printf("Processo de análise criado com PID %d\n", getpid());
 
 		signal(SIGINT, sigint_handler); // Configura o handler para SIGINT no processo de análise
-		analisis_process(board);
+		analysis_process(board);
 		
 		exit(EXIT_SUCCESS); // Certifique-se de sair do processo filho após a execução
 	}
@@ -35,7 +35,7 @@ static void create_analisis_process(t_sharedboard *board, pid_t analisis_pid)
 t_sharedboard *board = NULL; // Declared as extern in projeto.h
 int main()
 {
-	pid_t analisis_pid = -1;
+	pid_t analysis_pid = -1;
 	signal(SIGINT, SIG_IGN); // Ignora o sinal de interrupção (Ctrl+C) para evitar que o processo seja interrompido abruptamente
 
 	initialize_sharedboard(&board); // Inicializa o tabuleiro compartilhado	
@@ -45,9 +45,9 @@ int main()
 	for (int i = 0; i < STORAGE_CAPACITY; i++)
 		init_random_sample(&board->samples[i]);
 	
-	analisis_pid = fork();
-	create_analisis_process(board, analisis_pid); // Cria o processo de análise
+	analysis_pid = fork();
+	create_analysis_process(board, analysis_pid); // Cria o processo de análise
 
-	waitpid(analisis_pid, NULL, 0); // Espera o processo de análise terminar (opcional, dependendo do comportamento desejado)
+	waitpid(analysis_pid, NULL, 0); // Espera o processo de análise terminar (opcional, dependendo do comportamento desejado)
 	return 0;
 }

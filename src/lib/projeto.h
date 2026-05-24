@@ -13,6 +13,11 @@
 # include <unistd.h>
 # include <sys/wait.h>
 # include <stdarg.h>
+# include <signal.h>
+# include <pthread.h>
+# include <errno.h>
+# include <stdbool.h>
+
 
 # include "macros.h"
 
@@ -30,7 +35,7 @@ enum e_item_type
 enum e_log_type
 {
 	DRONE_LOG,
-	ANALISIS_LOG,
+	ANALYSIS_LOG,
 	MAIN_LOG
 };
 
@@ -63,19 +68,28 @@ typedef struct s_sharedboard
 	int out; // Índice para o próximo item a ser analisado no tabuleiro
 	int count; // Contagem de itens atualmente no tabuleiro
 
+	pthread_mutex_t mutex;
+
 	volatile sig_atomic_t stop_signal; // Sinal para indicar que os processos devem parar
 } t_sharedboard;
 
 extern t_sharedboard *board; 
 
+typedef struct s_analysis_thread_args
+{
+	t_sharedboard *board;
+	int thread_id;
+} t_analysis_thread_args;
+
 // init_shm.c
 void initialize_sharedboard(t_sharedboard **);
 
-// analisis_process.c
-void analisis_process(t_sharedboard *);
+// analysis_process.c
+void analysis_process(t_sharedboard *);
 
 // log.c
-void logger(enum e_log_type type,  const char *format, ...);
+void diff_timespec(struct timespec *result, struct timespec *end, struct timespec *start);
+void logger(enum e_log_type type, int id, const char *format, ...);
 
 // sample.c
 void init_random_sample(t_sample *sample);

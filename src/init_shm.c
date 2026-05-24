@@ -27,6 +27,7 @@ void initialize_sharedboard(t_sharedboard **board)
 
 	// initialize the shared board
 	memset(*board, 0, sizeof(t_sharedboard)); // Limpa toda a estrutura para garantir que os valores sejam inicializados corretamente
+	(*board)->mutex = (pthread_mutex_t)PTHREAD_MUTEX_INITIALIZER; // Inicializa o mutex para proteger o acesso ao tabuleiro
 	for (int i = 0; i < STORAGE_CAPACITY; i++)
 		init_sample(&(*board)->samples[i]);
 
