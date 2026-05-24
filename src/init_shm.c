@@ -1,18 +1,21 @@
 #include <projeto.h>
 
-
+// initializes sample with default values
 static void init_sample(t_sample *sample)
 {
-	sample->collectors_id = rand() % NUMBER_OF_DRONES; // Atribui um ID de coletor aleatório
-	sample->item_type = rand() % ITEM_TYPE_COUNT; // Atribui um tipo de item aleatório
-	clock_gettime(CLOCK_ID, &sample->collected_time); // Registra o tempo de coleta
-	clock_gettime(CLOCK_ID, &sample->deposited_to_table_time); // Registra o tempo de coleta
-	memset(&sample->begin_analising_time, 0, sizeof(struct timespec)); // Inicializa o tempo de início da análise como zero
-	memset(&sample->end_analising_time, 0, sizeof(struct timespec)); // Inicializa o tempo de fim da análise como zero
+	sample->collectors_id = -1;
+	sample->item_type = ITEM_TYPE_COUNT; // Valor inválido para indicar que o tipo do item não foi definido
+	memset(&sample->collected_time, 0, sizeof(struct timespec));
+	memset(&sample->deposited_to_table_time, 0, sizeof(struct timespec));
+	memset(&sample->begin_analising_time, 0, sizeof(struct timespec));
+	memset(&sample->end_analising_time, 0, sizeof(struct timespec));
 }
 
-
-void initialize_sharedboard(t_sharedboard *board)
+/*
+	@brief Função para inicializar o tabuleiro compartilhado
+	@param board Ponteiro para o tabuleiro compartilhado a ser inicializado
+*/
+void initialize_sharedboard(t_sharedboard **board)
 {
 	int shmid = -1;
 
@@ -27,19 +30,20 @@ void initialize_sharedboard(t_sharedboard *board)
 	}
 
 	// Attaching the shared memory segment to the process's address space
-	board = (t_sharedboard *)shmat(shmid, NULL, 0);
-	if (board == (t_sharedboard *)-1) {
+	*board = (t_sharedboard *)shmat(shmid, NULL, 0);
+	if (*board == (t_sharedboard *)-1) {
 		perror("shmat");
 		exit(EXIT_FAILURE);
 	}
 
 	// initialize the shared board
-	board->in = 0;
-	board->out = 0;
-	board->count = 0;
+	(*board)->in = 0;
+	(*board)->out = 0;
+	(*board)->count = 0;
+
 	for (int i = 0; i < STORAGE_CAPACITY; i++)
-		init_sample(&board->samples[i]);
+		init_sample(&(*board)->samples[i]);
 
 	if (DEBUG)
-		printf("[DEBUG] initialize_sharedboard finished | shmid %d | board %p.\n", shmid, (void *)board);
+		printf("[DEBUG] initialize_sharedboard finished | shmid %d | board %p.\n", shmid, (void *)(*board));
 }

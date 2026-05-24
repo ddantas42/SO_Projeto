@@ -11,6 +11,7 @@
 # include <sys/shm.h>
 # include <string.h>
 # include <unistd.h>
+# include <sys/wait.h>
 
 # include "macros.h"
 
@@ -57,6 +58,9 @@ typedef struct s_sharedboard
 
 
 // init_shm.c
-void initialize_sharedboard(t_sharedboard *board);
+void initialize_sharedboard(t_sharedboard **);
+
+// analisis_process.c
+void analisis_process(t_sharedboard *);
 
 #endif
