@@ -20,7 +20,7 @@ static t_sample get_sample(t_sharedboard *board)
 {
 	t_sample *sample = &board->samples[board->out];
 	t_sample local_sample = *sample;
-	init_sample(sample);
+	init_sample(sample); // Reseta a amostra no tabuleiro para indicar que o espaço está vazio
 
 	// Atualizar os índices e contagem do tabuleiro
 	board->out = (board->out + 1) % STORAGE_CAPACITY; // Move para a próxima posição circularmente
@@ -32,7 +32,7 @@ static t_sample get_sample(t_sharedboard *board)
 // simulates analysis of sample and puts timestamps for the sample.
 static void analyse_sample(t_sample *sample, int thread_id)
 {
-	int steps = (rand() % 201) + 100; // 100 → 300 (0.01s steps scaled)
+	int steps = (rand() % (ANALYSIS_MAX_TIME * 100 - 99)) + 100; // 100 → MAX_TIME (0.01s steps scaled)
 	struct timespec analysis_time = { .tv_sec = steps / 100, .tv_nsec = (steps % 100) * 10000000L }; // Tempo de análise entre 1 e 3 segundos
 	
 	clock_gettime(CLOCK_ID, &sample->begin_analising_time);
@@ -51,9 +51,9 @@ static void print_sample(t_sample *sample, int thread_id)
 	struct timespec *end = &sample->end_analising_time;
 	double duration = 0.0;
 
-	if (end->tv_sec > 0 || end->tv_nsec > 0) {
-		duration = (double)(end->tv_sec - begin->tv_sec) +
-				   (double)(end->tv_nsec - begin->tv_nsec) / 1e9;
+	if (end->tv_sec > 0 || end->tv_nsec > 0)
+	{
+		duration = (double)(end->tv_sec - begin->tv_sec) + (double)(end->tv_nsec - begin->tv_nsec) / 1e9;
 		if (duration < 0)
 			duration = 0.0;
 	}
