@@ -4,9 +4,7 @@ CFLAGS = -Wall -Wextra -Werror -pthread $(LIBFLAGS)
 TARGET = drone
 
 SRCDIR = src/
-SRCFILES = log.c sample.c init_shm.c analysis_process.c main.c 
-
-SRCS = $(addprefix $(SRCDIR), $(SRCFILES)) 
+SRCS = $(shell find $(SRCDIR) -type f -name '*.c')
 OBJS = $(SRCS:.c=.o)
 
 all: $(TARGET)

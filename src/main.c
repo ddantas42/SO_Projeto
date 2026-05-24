@@ -10,7 +10,7 @@ void sigint_handler(int signum)
 	}
 }
 
-static void create_analysis_process(t_sharedboard *board, pid_t analysis_pid)
+static void create_process(t_sharedboard *board, pid_t analysis_pid, void (*process_function)(t_sharedboard *))
 {
 	if (analysis_pid < 0) // if fork fails
 	{
@@ -23,7 +23,7 @@ static void create_analysis_process(t_sharedboard *board, pid_t analysis_pid)
 			printf("Processo de análise criado com PID %d\n", getpid());
 
 		signal(SIGINT, sigint_handler); // Configura o handler para SIGINT no processo de análise
-		analysis_process(board);
+		process_function(board);
 		
 		exit(EXIT_SUCCESS); // Certifique-se de sair do processo filho após a execução
 	}
@@ -35,7 +35,7 @@ static void create_analysis_process(t_sharedboard *board, pid_t analysis_pid)
 t_sharedboard *board = NULL; // Declared as extern in projeto.h
 int main()
 {
-	pid_t analysis_pid = -1;
+	pid_t analysis_pid = -1, fleet_pid = -1;
 	signal(SIGINT, SIG_IGN); // Ignora o sinal de interrupção (Ctrl+C) para evitar que o processo seja interrompido abruptamente
 
 	initialize_sharedboard(&board); // Inicializa o tabuleiro compartilhado	
@@ -46,7 +46,10 @@ int main()
 		init_random_sample(&board->samples[i]);
 	
 	analysis_pid = fork();
-	create_analysis_process(board, analysis_pid); // Cria o processo de análise
+	create_process(board, analysis_pid, analysis_process); // Cria o processo de análise
+
+	fleet_pid = fork();
+	create_process(board, fleet_pid, fleet_process); // Cria o processo da frota de drones
 
 	waitpid(analysis_pid, NULL, 0); // Espera o processo de análise terminar (opcional, dependendo do comportamento desejado)
 	return 0;

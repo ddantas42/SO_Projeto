@@ -75,11 +75,11 @@ typedef struct s_sharedboard
 
 extern t_sharedboard *board; 
 
-typedef struct s_analysis_thread_args
+typedef struct s_thread_args
 {
 	t_sharedboard *board;
 	int thread_id;
-} t_analysis_thread_args;
+} t_thread_args;
 
 // init_shm.c
 void initialize_sharedboard(t_sharedboard **);
@@ -87,12 +87,15 @@ void initialize_sharedboard(t_sharedboard **);
 // analysis_process.c
 void analysis_process(t_sharedboard *);
 
+// fleet_process.c
+void fleet_process(t_sharedboard *);
+
 // log.c
-void diff_timespec(struct timespec *result, struct timespec *end, struct timespec *start);
-void logger(enum e_log_type type, int id, const char *format, ...);
+void diff_timespec(struct timespec *, struct timespec *end, struct timespec *);
+void logger(enum e_log_type , int , const char *, ...);
 
 // sample.c
-void init_random_sample(t_sample *sample);
-void init_sample(t_sample *sample);
+void init_random_sample(t_sample *);
+void init_sample(t_sample *);
 
 #endif

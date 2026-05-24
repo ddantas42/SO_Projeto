@@ -58,17 +58,15 @@ static void print_sample(t_sample *sample, int thread_id)
 			duration = 0.0;
 	}
 
-	logger(ANALYSIS_LOG, thread_id,
-		   "Sample collector_id=%d, Type=%d, Duration=%.3f s\n",
-		   sample->collectors_id, sample->item_type, duration);
+	logger(ANALYSIS_LOG, thread_id, "Sample collector_id=%d, Type=%d, Duration=%.3f s\n", sample->collectors_id, sample->item_type, duration);
 }
 
 void *analysis_thread(void *arg)
 {
-	t_analysis_thread_args 	*thread_args = (t_analysis_thread_args *)arg;
-	t_sharedboard 			*board = thread_args->board;
-	t_sample 				local_sample;
-	int 					thread_id = thread_args->thread_id;
+	t_thread_args 	*thread_args = (t_thread_args *)arg;
+	t_sharedboard 	*board = thread_args->board;
+	t_sample 		local_sample;
+	int 			thread_id = thread_args->thread_id;
 
 	while (!board->stop_signal) // Loop principal do processo de análise, continua enquanto o sinal de parada não for acionado
 	{
@@ -101,7 +99,7 @@ void *analysis_thread(void *arg)
 void analysis_process(t_sharedboard *board)
 {
 	pthread_t analysis_thread_id[NUMBER_OF_ANALYSIS_THREADS];
-	t_analysis_thread_args thread_args[NUMBER_OF_ANALYSIS_THREADS];
+	t_thread_args thread_args[NUMBER_OF_ANALYSIS_THREADS];
 
 	srand(time(NULL) / getpid()); // Inicializa a semente do gerador de números aleatórios com base no tempo e no PID para garantir variedade entre processos
 	

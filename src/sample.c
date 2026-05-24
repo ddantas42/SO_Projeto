@@ -17,7 +17,7 @@ void init_sample(t_sample *sample)
 */
 void init_random_sample(t_sample *sample)
 {
-	sample->collectors_id = rand() % NUMBER_OF_DRONES;
+	sample->collectors_id = rand() % NUMBER_OF_DRONES_THREADS;
 	sample->item_type = rand() % ITEM_TYPE_COUNT;
 	clock_gettime(CLOCK_ID, &sample->collected_time);
 	clock_gettime(CLOCK_ID, &sample->deposited_to_table_time);
