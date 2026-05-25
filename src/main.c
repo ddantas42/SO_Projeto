@@ -45,6 +45,7 @@ int main()
 	pid_t analysis_pid = -1, exploration_pid = -1;
 	signal(SIGINT, sig_handler); // Ignora o sinal de interrupção (Ctrl+C) para evitar que o processo seja interrompido abruptamente
 	initialize_sharedboard(&board); // Inicializa o tabuleiro compartilhado	
+	initialize_results_csv(); // Cria o CSV de reconstrução antes dos forks
 	fflush(NULL); // Evita que buffers de stdout sejam duplicados após fork
 
 	analysis_pid = create_process(board, analysis_thread, NUMBER_OF_ANALYSIS_THREADS); // Cria o processo de análise

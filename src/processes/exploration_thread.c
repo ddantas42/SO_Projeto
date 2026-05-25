@@ -17,6 +17,7 @@ static t_sample generate_sample()
 
 void deposit_sample(t_sharedboard *board, t_sample *sample)
 {
+	clock_gettime(CLOCK_ID, &sample->deposited_to_table_time);
 	board->samples[board->in] = *sample; // Deposita a amostra no tabuleiro na posição atual de entrada
 
 	// Atualizar os índices e contagem do tabuleiro

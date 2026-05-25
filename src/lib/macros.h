@@ -1,14 +1,14 @@
 #ifndef MACROS_H
 #define MACROS_H
 
-# define STORAGE_CAPACITY 20 // Capacidade máxima de armazenamento máximo do tabuleiro onde os drones depositam
+# define STORAGE_CAPACITY 10 // Capacidade máxima de armazenamento máximo do tabuleiro onde os drones depositam
 
 // Drone Macros
 # define NUMBER_OF_DRONES_THREADS 5 // Números total de drones a serem criados
 # define DRONE_FINDING_TIME 5 // Tempo que o drone leva para encontrar um item (em segundos)
 
 // Análise Macros
-# define ANALYSIS_MAX_TIME 8 // Tempo máximo que a análise pode levar (em segundos, sendo o mínimo 1)
+# define ANALYSIS_MAX_TIME 2 // Tempo máximo que a análise pode levar (em segundos, sendo o mínimo 1)
 # define NUMBER_OF_ANALYSIS_THREADS 2 // Número de threads de análise a serem criadas
 
 // definir se usamos CLOCK_MONOTONIC ou CLOCK_REALTIME para medir o tempo

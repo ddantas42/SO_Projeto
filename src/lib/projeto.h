@@ -96,6 +96,10 @@ void *exploration_thread(void *);
 void diff_timespec(struct timespec *, struct timespec *end, struct timespec *);
 void logger(enum e_log_type , int , const char *, ...);
 
+// csv.c
+void initialize_results_csv(void);
+void append_sample_csv(const t_sample *, int);
+
 // thread_creator.c
 void thread_creator(t_sharedboard *, void *(*)(void *), int);
 

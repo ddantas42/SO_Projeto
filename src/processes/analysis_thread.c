@@ -51,6 +51,7 @@ void *analysis_thread(void *arg)
 		pthread_mutex_unlock(&board->board_mutex);
 
 		analyse_sample(&local_sample, thread_id);
+		append_sample_csv(&local_sample, thread_id);
 
 		// print_sample(&local_sample, thread_id);
 		init_sample(&local_sample); // Limpa a amostra local para a próxima análise

@@ -45,3 +45,42 @@ consume:
   read[out]
   out = (out + 1) % STORAGE_CAPACITY
   count--
+
+---
+
+## CSV Board Visualizer
+
+The run now exports `analysis_results.csv` with timestamps for deposit/start/end analysis.
+
+Use the visual replay tool to reconstruct board state at each event:
+
+```bash
+python3 board_visualizer.py
+```
+
+Optional headless summary (useful in remote terminals):
+
+```bash
+python3 board_visualizer.py analysis_results.csv --headless
+```
+
+---
+
+## Web Visualizer (HTML/CSS/JS)
+
+Open the new frontend visualizer from the `visualizer/` folder.
+
+Run a local static server from project root:
+
+```bash
+python3 -m http.server 8000
+```
+
+Then open:
+
+`http://localhost:8000/visualizer/`
+
+Inside the page you can:
+- Load `../analysis_results.csv` directly
+- Or choose any CSV file manually
+- Replay each timestamped board event with slider/play controls
