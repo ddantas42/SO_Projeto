@@ -24,20 +24,20 @@ void deposit_sample(t_sharedboard *board, t_sample *sample)
 	board->count++;
 }
 
-static void print_current_board(t_sharedboard *board)
-{
-	for (int i = 0; i < STORAGE_CAPACITY; i++)
-	{
-		if (i > 0)
-			printf(" | ");
+// static void print_current_board(t_sharedboard *board)
+// {
+// 	for (int i = 0; i < STORAGE_CAPACITY; i++)
+// 	{
+// 		if (i > 0)
+// 			printf(" | ");
 
-		if (board->samples[i].collectors_id != -1)
-			printf("[O]");
-		else
-			printf("[X]");
-	}
-	printf("\n");
-}
+// 		if (board->samples[i].collectors_id != -1)
+// 			printf("[O]");
+// 		else
+// 			printf("[X]");
+// 	}
+// 	printf("\n");
+// }
 
 
 void *exploration_thread(void *arg)
@@ -62,7 +62,7 @@ void *exploration_thread(void *arg)
 		}
 		
 		deposit_sample(board, &new_sample); // Deposita a nova amostra no tabuleiro compartilhado
-		print_current_board(board); // Imprime o estado atual do tabuleiro para fins de debug
+		// print_current_board(board); // Imprime o estado atual do tabuleiro para fins de debug
 		pthread_mutex_unlock(&board->board_mutex);
 
 		logger(DRONE_LOG, thread_id, "Deposited sample of type %d\n", new_sample.item_type);

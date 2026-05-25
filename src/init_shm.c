@@ -33,5 +33,5 @@ void initialize_sharedboard(t_sharedboard **board)
 		init_sample(&(*board)->samples[i]);
 
 	if (DEBUG)
-		printf("[DEBUG] initialize_sharedboard finished | shmid %d | board %p.\n", shmid, (void *)(*board));
+		logger(MAIN_LOG, 0,"Initialize_sharedboard finished | shmid %d | board %p.\n", shmid, (void *)(*board));
 }

@@ -40,6 +40,7 @@ void logger(enum e_log_type type, int id, const char *format, ...)
 		printf("[%02ld.%02ld.%04ld][MAIN] ", minutes, seconds, millis);
 
 	vprintf(format, args);
+	fflush(stdout); // Garante que a mensagem de log seja impressa imediatamente
 	pthread_mutex_unlock(&board->log_mutex); // Desbloqueia o mutex do logger após imprimir a mensagem
 	va_end(args);
 }

@@ -11,12 +11,6 @@ void sig_handler(int signum)
 		if (DEBUG)
 			printf("[DEBUG] SIGINT recebido, sinalizando para os processos pararem.\n");
 	}
-	if (signum == SIGTSTP)
-	{
-		board->pause_analysis = board->pause_analysis ? 0 : 1; // Alterna o estado de pausa da análise
-		if (DEBUG)
-			printf("[DEBUG] SIGTSTP recebido, pausando a análise.\n");
-	}
 }
 
 static pid_t create_process(t_sharedboard *board, void *(*thread_fun)(void *), int number_of_threads)
@@ -31,11 +25,10 @@ static pid_t create_process(t_sharedboard *board, void *(*thread_fun)(void *), i
 	if (pid == 0) // if we are in the child process
 	{
 		if (DEBUG)
-			printf("Processo de análise criado com PID %d\n", getpid());
+			logger(MAIN_LOG, 0,"Processo de análise criado com PID %d\n", getpid());
 		
 		// ignora signal
 		signal(SIGINT, SIG_IGN); // Ignora o sinal de interrupção (Ctrl+C) para evitar que o processo seja interrompido abruptamente
-		signal(SIGTSTP, SIG_IGN); // Ignora o sinal de término
 		thread_creator(board, thread_fun, number_of_threads);
 		
 		exit(EXIT_SUCCESS); // Certifique-se de sair do processo filho após a execução
@@ -51,8 +44,8 @@ int main()
 {
 	pid_t analysis_pid = -1, exploration_pid = -1;
 	signal(SIGINT, sig_handler); // Ignora o sinal de interrupção (Ctrl+C) para evitar que o processo seja interrompido abruptamente
-	signal(SIGTSTP, sig_handler); // Ignora o sinal de término (Ctrl+Z) para evitar que o processo seja interrompido abruptamente
 	initialize_sharedboard(&board); // Inicializa o tabuleiro compartilhado	
+	fflush(NULL); // Evita que buffers de stdout sejam duplicados após fork
 
 	analysis_pid = create_process(board, analysis_thread, NUMBER_OF_ANALYSIS_THREADS); // Cria o processo de análise
 	exploration_pid = create_process(board, exploration_thread, NUMBER_OF_DRONES_THREADS); // Cria o processo da frota de drones
