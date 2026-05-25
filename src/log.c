@@ -31,6 +31,7 @@ void logger(enum e_log_type type, int id, const char *format, ...)
 	long seconds = diff.tv_sec % 60;
 	long millis = diff.tv_nsec / 1000000;
 
+	pthread_mutex_lock(&board->log_mutex); // Protege o acesso ao logger para evitar mensagens de log misturadas
 	if (type == DRONE_LOG)
 		printf("[%02ld.%02ld.%04ld]\t\t[DRONE %d] ", minutes, seconds, millis, id);
 	else if (type == ANALYSIS_LOG)
@@ -39,5 +40,6 @@ void logger(enum e_log_type type, int id, const char *format, ...)
 		printf("[%02ld.%02ld.%04ld][MAIN] ", minutes, seconds, millis);
 
 	vprintf(format, args);
+	pthread_mutex_unlock(&board->log_mutex); // Desbloqueia o mutex do logger após imprimir a mensagem
 	va_end(args);
 }

@@ -24,7 +24,23 @@ void deposit_sample(t_sharedboard *board, t_sample *sample)
 	board->count++;
 }
 
-void *fleet_thread(void *arg)
+static void print_current_board(t_sharedboard *board)
+{
+	for (int i = 0; i < STORAGE_CAPACITY; i++)
+	{
+		if (i > 0)
+			printf(" | ");
+
+		if (board->samples[i].collectors_id != -1)
+			printf("[O]");
+		else
+			printf("[X]");
+	}
+	printf("\n");
+}
+
+
+void *exploration_thread(void *arg)
 {
 	t_thread_args 			*thread_args = (t_thread_args *)arg;
 	t_sharedboard 			*board = thread_args->board;
@@ -37,16 +53,17 @@ void *fleet_thread(void *arg)
 
 		new_sample = generate_sample(); // Gera uma nova amostra com dados aleatórios
 		
-		pthread_mutex_lock(&board->mutex);
+		pthread_mutex_lock(&board->board_mutex);
 		if (board->count >= STORAGE_CAPACITY) // thread safety check
 		{
-			pthread_mutex_unlock(&board->mutex); // Desbloqueia o mutex antes de continuar
+			pthread_mutex_unlock(&board->board_mutex); // Desbloqueia o mutex antes de continuar
 			logger(DRONE_LOG, thread_id, "Waiting for space on the board...\n");
-			continue; // O tabuleiro está cheio, continua para a próxima iteração do loop
+			continue ; // O tabuleiro está cheio, continua para a próxima iteração do loop
 		}
 		
 		deposit_sample(board, &new_sample); // Deposita a nova amostra no tabuleiro compartilhado
-		pthread_mutex_unlock(&board->mutex);
+		print_current_board(board); // Imprime o estado atual do tabuleiro para fins de debug
+		pthread_mutex_unlock(&board->board_mutex);
 
 		logger(DRONE_LOG, thread_id, "Deposited sample of type %d\n", new_sample.item_type);
 		
@@ -55,35 +72,4 @@ void *fleet_thread(void *arg)
 	logger(DRONE_LOG, thread_id, "Stopping..\n");
 
 	return NULL;
-}
-
-void fleet_process(t_sharedboard *board)
-{
-	pthread_t fleet_thread_id[NUMBER_OF_DRONES_THREADS];
-	t_thread_args thread_args[NUMBER_OF_DRONES_THREADS];
-
-	srand(time(NULL) / getpid()); // Inicializa a semente do gerador de números aleatórios com base no tempo e no PID para garantir variedade entre processos
-	
-	// Criar as threads da frota
-	for (int i = 0; i < NUMBER_OF_DRONES_THREADS; i++)
-	{
-		thread_args[i].board = board; // Atribui o ponteiro para o tabuleiro compartilhado
-		thread_args[i].thread_id = i; // Atribui o ID da thread para fins de identificação (opcional)
-
-		if (pthread_create(&fleet_thread_id[i], NULL, fleet_thread, (void *)&thread_args[i]) != 0)
-		{
-			perror("pthread_create");
-			exit(EXIT_FAILURE);
-		}
-	}
-
-	// Esperar as threads da frota terminarem
-	for (int i = 0; i < NUMBER_OF_DRONES_THREADS; i++)
-	{
-		if (pthread_join(fleet_thread_id[i], NULL) != 0)
-		{
-			perror("pthread_join");
-			exit(EXIT_FAILURE);
-		}
-	}
 }

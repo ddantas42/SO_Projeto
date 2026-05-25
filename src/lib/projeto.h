@@ -68,9 +68,11 @@ typedef struct s_sharedboard
 	int out; // Índice para o próximo item a ser analisado no tabuleiro
 	int count; // Contagem de itens atualmente no tabuleiro
 
-	pthread_mutex_t mutex;
+	pthread_mutex_t board_mutex; // Mutex para proteger o acesso ao tabuleiro
+	pthread_mutex_t log_mutex; // Mutex para proteger o acesso ao logger
 
 	volatile sig_atomic_t stop_signal; // Sinal para indicar que os processos devem parar
+	volatile sig_atomic_t pause_analysis; // Sinal para indicar que a análise deve ser pausada
 } t_sharedboard;
 
 extern t_sharedboard *board; 
@@ -85,14 +87,17 @@ typedef struct s_thread_args
 void initialize_sharedboard(t_sharedboard **);
 
 // analysis_process.c
-void analysis_process(t_sharedboard *);
+void *analysis_thread(void *);
 
-// fleet_process.c
-void fleet_process(t_sharedboard *);
+// exploration_process.c
+void *exploration_thread(void *);
 
 // log.c
 void diff_timespec(struct timespec *, struct timespec *end, struct timespec *);
 void logger(enum e_log_type , int , const char *, ...);
+
+// thread_creator.c
+void thread_creator(t_sharedboard *, void *(*)(void *), int);
 
 // sample.c
 void init_random_sample(t_sample *);
