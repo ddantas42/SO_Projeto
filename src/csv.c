@@ -1,10 +1,8 @@
 #include <projeto.h>
 
-#define CSV_FILE_PATH "analysis_results.csv"
-
 static void write_csv_header(FILE *file)
 {
-	fprintf(file, "analysis_thread_id,collector_id,item_type,collected_sec,collected_nsec,deposited_sec,deposited_nsec,analysis_begin_sec,analysis_begin_nsec,analysis_end_sec,analysis_end_nsec\n");
+	fprintf(file, "analyser_id,collector_id,item_type,collected_sec,collected_nsec,deposited_sec,deposited_nsec,analysis_begin_sec,analysis_begin_nsec,analysis_end_sec,analysis_end_nsec\n");
 }
 
 void initialize_results_csv(void)
@@ -20,7 +18,7 @@ void initialize_results_csv(void)
 	fclose(file);
 }
 
-void append_sample_csv(const t_sample *sample, int thread_id)
+void append_sample_csv(const t_sample *sample)
 {
 	FILE *file;
 
@@ -37,8 +35,8 @@ void append_sample_csv(const t_sample *sample, int thread_id)
 	}
 	fprintf(file,
 		"%d,%d,%d,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld\n",
-		thread_id,
-		sample->collectors_id,
+		sample->analyser_id,
+		sample->collector_id,
 		sample->item_type,
 		(long)sample->collected_time.tv_sec,
 		sample->collected_time.tv_nsec,

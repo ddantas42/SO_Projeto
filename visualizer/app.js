@@ -45,8 +45,8 @@ function parseCsv(text) {
 
   const headers = lines[0].split(",").map((h) => h.trim());
   const index = Object.fromEntries(headers.map((h, i) => [h, i]));
+  const analyserIndex = index.analyser_id ?? index.analysis_thread_id;
   const required = [
-    "analysis_thread_id",
     "collector_id",
     "item_type",
     "deposited_sec",
@@ -63,11 +63,15 @@ function parseCsv(text) {
     }
   }
 
+  if (analyserIndex == null) {
+    throw new Error("Missing CSV column: analyser_id");
+  }
+
   return lines.slice(1).filter(Boolean).map((line, rowIndex) => {
     const cols = line.split(",").map((c) => c.trim());
     return {
       rowIndex,
-      analysisThreadId: Number(cols[index.analysis_thread_id]),
+      analysisThreadId: Number(cols[analyserIndex]),
       collectorId: Number(cols[index.collector_id]),
       itemType: Number(cols[index.item_type]),
       depositedNs: ns(cols[index.deposited_sec], cols[index.deposited_nsec]),

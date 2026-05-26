@@ -50,7 +50,9 @@ struct timespec
 
 typedef struct s_sample
 {
-	int	collectors_id;
+	int	collector_id;
+	int	analyser_id;
+
 	enum e_item_type item_type;
 
 	struct timespec	collected_time;
@@ -98,7 +100,7 @@ void logger(enum e_log_type , int , const char *, ...);
 
 // csv.c
 void initialize_results_csv(void);
-void append_sample_csv(const t_sample *, int);
+void append_sample_csv(const t_sample *);
 
 // thread_creator.c
 void thread_creator(t_sharedboard *, void *(*)(void *), int);

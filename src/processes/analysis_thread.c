@@ -28,6 +28,8 @@ static void analyse_sample(t_sample *sample, int thread_id)
 	logger(ANALYSIS_LOG, thread_id, "Finished analysing type %d\n", sample->item_type);
 	clock_gettime(CLOCK_ID, &sample->end_analising_time);
 
+	sample->analyser_id = thread_id; // Atribui o ID da thread de análise à amostra para fins de registro
+
 }
 
 void *analysis_thread(void *arg)
@@ -51,7 +53,7 @@ void *analysis_thread(void *arg)
 		pthread_mutex_unlock(&board->board_mutex);
 
 		analyse_sample(&local_sample, thread_id);
-		append_sample_csv(&local_sample, thread_id);
+		append_sample_csv(&local_sample);
 
 		// print_sample(&local_sample, thread_id);
 		init_sample(&local_sample); // Limpa a amostra local para a próxima análise

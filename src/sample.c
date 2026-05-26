@@ -3,7 +3,8 @@
 // initializes sample with default values
 void init_sample(t_sample *sample)
 {
-	sample->collectors_id = -1;
+	sample->collector_id = -1;
+	sample->analyser_id = -1; // Valor inválido para indicar que o analisador não foi definido
 	sample->item_type = ITEM_TYPE_COUNT; // Valor inválido para indicar que o tipo do item não foi definido
 	memset(&sample->collected_time, 0, sizeof(struct timespec));
 	memset(&sample->deposited_to_table_time, 0, sizeof(struct timespec));
@@ -17,7 +18,8 @@ void init_sample(t_sample *sample)
 */
 void init_random_sample(t_sample *sample)
 {
-	sample->collectors_id = rand() % NUMBER_OF_DRONES_THREADS;
+	sample->collector_id = rand() % NUMBER_OF_DRONES_THREADS;
+	sample->analyser_id = -1; // Inicialmente, o analisador é desconhecido
 	sample->item_type = rand() % ITEM_TYPE_COUNT;
 	clock_gettime(CLOCK_ID, &sample->collected_time);
 	clock_gettime(CLOCK_ID, &sample->deposited_to_table_time);

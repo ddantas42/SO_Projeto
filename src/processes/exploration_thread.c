@@ -4,7 +4,7 @@ static t_sample generate_sample()
 {
 	t_sample new_sample;
 
-	new_sample.collectors_id = rand() % NUMBER_OF_DRONES_THREADS;
+	new_sample.collector_id = rand() % NUMBER_OF_DRONES_THREADS;
 	new_sample.item_type = rand() % ITEM_TYPE_COUNT;
 	clock_gettime(CLOCK_ID, &new_sample.collected_time);
 	
@@ -32,7 +32,7 @@ void deposit_sample(t_sharedboard *board, t_sample *sample)
 // 		if (i > 0)
 // 			printf(" | ");
 
-// 		if (board->samples[i].collectors_id != -1)
+// 		if (board->samples[i].collector_id != -1)
 // 			printf("[O]");
 // 		else
 // 			printf("[X]");
