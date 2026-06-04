@@ -75,6 +75,7 @@ typedef struct s_sharedboard
 
 	volatile sig_atomic_t stop_signal; // Sinal para indicar que os processos devem parar
 	volatile sig_atomic_t pause_analysis; // Sinal para indicar que a análise deve ser pausada
+
 } t_sharedboard;
 
 extern t_sharedboard *board; 
@@ -85,8 +86,9 @@ typedef struct s_thread_args
 	int thread_id;
 } t_thread_args;
 
-// init_shm.c
+// shm.c
 void initialize_sharedboard(t_sharedboard **);
+void free_sharedboard(t_sharedboard *);
 
 // analysis_process.c
 void *analysis_thread(void *);

@@ -35,3 +35,13 @@ void initialize_sharedboard(t_sharedboard **board)
 	if (DEBUG)
 		logger(MAIN_LOG, 0,"Initialize_sharedboard finished | shmid %d | board %p.\n", shmid, (void *)(*board));
 }
+
+void free_sharedboard(t_sharedboard *board)
+{
+	if (board == NULL)
+		return;
+		
+	pthread_mutex_destroy(&board->board_mutex);
+	pthread_mutex_destroy(&board->log_mutex);
+	shmdt(board); // Detach the shared memory segment from the process's address space
+}

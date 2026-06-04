@@ -1,20 +1,19 @@
 #include <projeto.h>
 
-static void write_csv_header(FILE *file)
-{
-	fprintf(file, "analyser_id,collector_id,item_type,collected_sec,collected_nsec,deposited_sec,deposited_nsec,analysis_begin_sec,analysis_begin_nsec,analysis_end_sec,analysis_end_nsec\n");
-}
-
 void initialize_results_csv(void)
 {
-	FILE *file = fopen(CSV_FILE_PATH, "w");
-
+	FILE *file = fopen(CSV_FILE_PATH, "w+");
+	
 	if (file == NULL)
 	{
 		perror("fopen");
+		logger(MAIN_LOG, 1,"Erro ao criar o arquivo CSV de resultados.\n");
 		exit(EXIT_FAILURE);
 	}
-	write_csv_header(file);
+
+	// write header
+	fprintf(file, "analyser_id,collector_id,item_type,collected_sec,collected_nsec,deposited_sec,deposited_nsec,analysis_begin_sec,analysis_begin_nsec,analysis_end_sec,analysis_end_nsec\n");
+	
 	fclose(file);
 }
 
