@@ -6,10 +6,10 @@ void sig_handler(int signum)
 	{
 		if (board != NULL)
 			board->stop_signal = 1; // Sinaliza para os processos que eles devem parar
-
 		if (DEBUG)
-			printf("[DEBUG] SIGINT recebido, sinalizando para os processos pararem.\n");
+			printf("[DEBUG] SIGINT recebido, stopping processes....\n");
 	}
+
 }
 
 static pid_t create_process(t_sharedboard *board, void *(*thread_fun)(void *), int number_of_threads)
@@ -36,24 +36,13 @@ static pid_t create_process(t_sharedboard *board, void *(*thread_fun)(void *), i
 	return pid;
 }
 
-
-
-// void free_sharedboard(t_sharedboard *board)
-// {
-// 	if (board == NULL)
-// 		return;
-		
-// 	pthread_mutex_destroy(&board->board_mutex);
-// 	pthread_mutex_destroy(&board->log_mutex);
-// 	free(board);
-// }
-
 t_sharedboard *board = NULL; // Declared as extern in projeto.h
 int main()
 {
 	pid_t analysis_pid = -1;
 	pid_t exploration_pid = -1;
 
+	
 	signal(SIGINT, sig_handler); // Ignora o sinal de interrupção (Ctrl+C) para evitar que o processo seja interrompido abruptamente
 
 	initialize_results_csv(); // Cria o CSV de reconstrução antes dos forks
