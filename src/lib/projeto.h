@@ -111,4 +111,8 @@ void thread_creator(t_sharedboard *, void *(*)(void *), int);
 void init_random_sample(t_sample *);
 void init_sample(t_sample *);
 
+// signal.c
+void sig_handler(int);
+void register_sig(int signum, void (*handler)(int));
+
 #endif

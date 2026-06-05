@@ -25,7 +25,7 @@ static void analyse_sample(t_sample *sample, int thread_id)
 	
 	nanosleep(&analysis_time, NULL); // Simula o tempo de análise entre 1 e 3 segundos
 	
-	logger(ANALYSIS_LOG, thread_id, "Finished analysing type %d\n", sample->item_type);
+	logger(ANALYSIS_LOG, thread_id, "Finished analysing type %d, taking %.2f seconds\n", sample->item_type, (steps / 100.0));
 	clock_gettime(CLOCK_ID, &sample->end_analising_time);
 
 	sample->analyser_id = thread_id; // Atribui o ID da thread de análise à amostra para fins de registro

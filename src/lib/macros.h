@@ -8,7 +8,7 @@
 # define DRONE_FINDING_TIME 5 // Tempo que o drone leva para encontrar um item (em segundos)
 
 // Análise Macros
-# define ANALYSIS_MAX_TIME 2 // Tempo máximo que a análise pode levar (em segundos, sendo o mínimo 1)
+# define ANALYSIS_MAX_TIME 3 // Tempo máximo que a análise pode levar (em segundos, sendo o mínimo 1)
 # define NUMBER_OF_ANALYSIS_THREADS 2 // Número de threads de análise a serem criadas
 
 // definir se usamos CLOCK_MONOTONIC ou CLOCK_REALTIME para medir o tempo

@@ -1,20 +1,14 @@
 #include <projeto.h>
 
-void sig_handler(int signum)
-{
-	if (signum == SIGINT)
-	{
-		if (board != NULL)
-			board->stop_signal = 1; // Sinaliza para os processos que eles devem parar
-		if (DEBUG)
-			printf("[DEBUG] SIGINT recebido, stopping processes....\n");
-	}
-
-}
-
 static pid_t create_process(t_sharedboard *board, void *(*thread_fun)(void *), int number_of_threads)
 {
 	pid_t pid = -1;
+
+	// struct sigaction sa;
+	// sa.sa_handler = SIG_IGN; // Ignora sinais no processo pai para evitar que
+	// sigemptyset(&sa.sa_mask);
+	// sa.sa_flags = 0;
+	
 	pid = fork();
 	if (pid < 0) // if fork fails
 	{
@@ -23,6 +17,8 @@ static pid_t create_process(t_sharedboard *board, void *(*thread_fun)(void *), i
 	}
 	if (pid == 0) // if we are in the child process
 	{
+		register_sig(SIGINT, SIG_IGN); // Registra o manipulador de sinal para SIGINT (Ctrl+C) no processo filho
+
 		if (DEBUG)
 			logger(MAIN_LOG, 0,"Processo de análise criado com PID %d\n", getpid());
 		
@@ -42,8 +38,8 @@ int main()
 	pid_t analysis_pid = -1;
 	pid_t exploration_pid = -1;
 
-	
-	signal(SIGINT, sig_handler); // Ignora o sinal de interrupção (Ctrl+C) para evitar que o processo seja interrompido abruptamente
+	register_sig(SIGINT, sig_handler); // Registra o manipulador de sinal para SIGINT (Ctrl+C
+	// sigaction(SIGTSTP, &sa, NULL); // Configura o manipulador de sinal para SIGSTP (Ctrl+Z)
 
 	initialize_results_csv(); // Cria o CSV de reconstrução antes dos forks
 	initialize_sharedboard(&board); // Inicializa o tabuleiro compartilhado	
