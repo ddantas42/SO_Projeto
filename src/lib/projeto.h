@@ -108,7 +108,6 @@ void append_sample_csv(const t_sample *);
 void thread_creator(t_sharedboard *, void *(*)(void *), int);
 
 // sample.c
-void init_random_sample(t_sample *);
 void init_sample(t_sample *);
 
 // signal.c

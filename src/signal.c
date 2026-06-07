@@ -10,13 +10,13 @@ void sig_handler(int signum)
 			printf("[DEBUG] SIGINT recebido, stopping processes....\n");
 	}
 
-	// if (signum == SIGTSTP)
-	// {
-	// 	if (board != NULL)
-	// 		board->pause_analysis = !board->pause_analysis; // Alterna o estado de pausa da análise
-	// 	if (DEBUG)
-	// 		printf("[DEBUG] SIGTSTP recebido, %s analysis....\n", board->pause_analysis ? "pausing" : "resuming");
-	// }
+	if (signum == SIGTSTP)
+	{
+		if (board != NULL)
+			board->pause_analysis = !board->pause_analysis; // Alterna o estado de pausa da análise
+		if (DEBUG)
+			printf("[DEBUG] SIGTSTP recebido, %s analysis....\n", board->pause_analysis ? "pausing" : "resuming");
+	}
 }
 
 void register_sig(int signum, void (*handler)(int))

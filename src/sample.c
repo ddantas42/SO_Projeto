@@ -11,18 +11,3 @@ void init_sample(t_sample *sample)
 	memset(&sample->begin_analising_time, 0, sizeof(struct timespec));
 	memset(&sample->end_analising_time, 0, sizeof(struct timespec));
 }
-
-/*
-	@brief Função para inicializar uma amostra com dados aleatórios para fins de teste
-	@param sample Ponteiro para a amostra a ser inicializada
-*/
-void init_random_sample(t_sample *sample)
-{
-	sample->collector_id = rand() % NUMBER_OF_DRONES_THREADS;
-	sample->analyser_id = -1; // Inicialmente, o analisador é desconhecido
-	sample->item_type = rand() % ITEM_TYPE_COUNT;
-	clock_gettime(CLOCK_ID, &sample->collected_time);
-	clock_gettime(CLOCK_ID, &sample->deposited_to_table_time);
-	memset(&sample->begin_analising_time, 0, sizeof(struct timespec));
-	memset(&sample->end_analising_time, 0, sizeof(struct timespec));
-}

@@ -1,10 +1,10 @@
 #include <projeto.h>
 
-static t_sample generate_sample()
+static t_sample generate_sample(int collector_id)
 {
 	t_sample new_sample;
 
-	new_sample.collector_id = rand() % NUMBER_OF_DRONES_THREADS;
+	new_sample.collector_id = collector_id;
 	new_sample.item_type = rand() % ITEM_TYPE_COUNT;
 	clock_gettime(CLOCK_ID, &new_sample.collected_time);
 	
@@ -25,22 +25,6 @@ void deposit_sample(t_sharedboard *board, t_sample *sample)
 	board->count++;
 }
 
-// static void print_current_board(t_sharedboard *board)
-// {
-// 	for (int i = 0; i < STORAGE_CAPACITY; i++)
-// 	{
-// 		if (i > 0)
-// 			printf(" | ");
-
-// 		if (board->samples[i].collector_id != -1)
-// 			printf("[O]");
-// 		else
-// 			printf("[X]");
-// 	}
-// 	printf("\n");
-// }
-
-
 void *exploration_thread(void *arg)
 {
 	t_thread_args 			*thread_args = (t_thread_args *)arg;
@@ -52,7 +36,7 @@ void *exploration_thread(void *arg)
 	{
 		sleep(DRONE_FINDING_TIME); // Simula o tempo entre as coletas de amostras pela frota de drones
 
-		new_sample = generate_sample(); // Gera uma nova amostra com dados aleatórios
+		new_sample = generate_sample(thread_id); // Gera uma nova amostra com dados aleatórios
 		
 		pthread_mutex_lock(&board->board_mutex);
 		if (board->count >= STORAGE_CAPACITY) // thread safety check
