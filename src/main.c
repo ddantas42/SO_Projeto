@@ -4,11 +4,6 @@ static pid_t create_process(t_sharedboard *board, void *(*thread_fun)(void *), i
 {
 	pid_t pid = -1;
 
-	// struct sigaction sa;
-	// sa.sa_handler = SIG_IGN; // Ignora sinais no processo pai para evitar que
-	// sigemptyset(&sa.sa_mask);
-	// sa.sa_flags = 0;
-	
 	pid = fork();
 	if (pid < 0) // if fork fails
 	{
@@ -23,7 +18,7 @@ static pid_t create_process(t_sharedboard *board, void *(*thread_fun)(void *), i
 			logger(MAIN_LOG, 0,"Processo de análise criado com PID %d\n", getpid());
 		
 		// ignora signal
-		signal(SIGINT, SIG_IGN); // Ignora o sinal de interrupção (Ctrl+C) para evitar que o processo seja interrompido abruptamente
+		register_sig(SIGINT, SIG_IGN); // Ignora o sinal de interrupção (Ctrl+C) para evitar que o processo seja interrompido abruptamente
 		thread_creator(board, thread_fun, number_of_threads);
 		
 		exit(EXIT_SUCCESS); // Certifique-se de sair do processo filho após a execução
@@ -38,7 +33,7 @@ int main()
 	pid_t analysis_pid = -1;
 	pid_t exploration_pid = -1;
 
-	register_sig(SIGINT, sig_handler); // Registra o manipulador de sinal para SIGINT (Ctrl+C
+	register_sig(SIGINT, sig_handler); // Registra o manipulador de sinal para SIGINT (Ctrl+C)
 	// sigaction(SIGTSTP, &sa, NULL); // Configura o manipulador de sinal para SIGSTP (Ctrl+Z)
 
 	initialize_results_csv(); // Cria o CSV de reconstrução antes dos forks
