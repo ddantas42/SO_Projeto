@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="pt" class="h-full">
+ <head><script src="/_sdk/telemetry_sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&amp;family=Outfit:wght@300;500;700;900&amp;display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Outfit', sans-serif; }
+    code, .mono { font-family: 'JetBrains Mono', monospace; }
+    .slide { display: none; }
+    .slide.active { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-in { animation: fadeIn 0.5s ease forwards; }
+    .animate-in-delay { animation: fadeIn 0.5s ease 0.2s forwards; opacity: 0; }
+    .animate-in-delay2 { animation: fadeIn 0.5s ease 0.4s forwards; opacity: 0; }
+    @keyframes pulse-dot { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.3); } }
+    .pulse-dot { animation: pulse-dot 2s infinite; }
+    .progress-bar { transition: width 0.3s ease; }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full w-full bg-slate-950 text-white overflow-hidden">
+  <div id="app" class="h-full w-full relative flex flex-col">
+   <!-- Progress bar -->
+   <div class="absolute top-0 left-0 right-0 h-1 bg-slate-800 z-50">
+    <div id="progress" class="progress-bar h-full bg-gradient-to-r from-violet-400 to-pink-400"></div>
+   </div>
+   <div id="counter" class="absolute top-4 right-6 text-sm text-slate-500 mono z-50"></div>
+
+   <!-- SLIDE 1: Title -->
+   <div class="slide active flex-col items-center justify-center h-full p-12 text-center" data-slide="0">
+    <div class="animate-in">
+     <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-500/10 border border-violet-500/30 text-violet-400 text-sm mb-8">
+      <span class="w-2 h-2 rounded-full bg-violet-400 pulse-dot inline-block"></span> Análise Técnica
+     </div>
+    </div>
+    <h1 class="text-5xl md:text-6xl font-900 animate-in-delay bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent leading-tight max-w-4xl">Deep Dive: Exploração com Drones</h1>
+    <p class="text-xl text-slate-400 mt-6 animate-in-delay2 max-w-2xl">Dissecando fork(), threads, sincronização e sinais no código real</p>
+   </div>
+
+   <!-- SLIDE 2: Main Function Flow -->
+   <div class="slide flex-col items-center justify-center h-full p-12" data-slide="1">
+    <h2 class="text-3xl font-bold mb-2 animate-in">main() — Fluxo de Execução</h2>
+    <p class="text-slate-400 mb-10 animate-in-delay">Orquestração da inicialização</p>
+    <div class="max-w-5xl w-full animate-in-delay2">
+     <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6">
+      <div class="mono text-sm space-y-1 text-slate-300 bg-slate-950 rounded-lg p-4 overflow-x-auto">
+       <p><span class="text-violet-400">// 1. Registar handlers de sinal</span></p>
+       <p>register_sig(SIGINT, sig_handler);</p>
+       <p>register_sig(SIGTSTP, sig_handler);</p>
+       <p></p>
+       <p><span class="text-violet-400">// 2. Setup IPC antes dos forks</span></p>
+       <p>initialize_results_csv();</p>
+       <p>initialize_sharedboard(&amp;board);</p>
+       <p>fflush(NULL); <span class="text-slate-600">// Criticamente importante!</span></p>
+       <p></p>
+       <p><span class="text-violet-400">// 3. Criar child processes</span></p>
+       <p>analysis_pid = create_process(board, analysis_thread,</p>
+       <p class="ml-4">NUMBER_OF_ANALYSIS_THREADS);</p>
+       <p>exploration_pid = create_process(board, exploration_thread,</p>
+       <p class="ml-4">NUMBER_OF_DRONES_THREADS);</p>
+       <p></p>
+       <p><span class="text-violet-400">// 4. Aguardar término dos filhos</span></p>
+       <p>wait_for_child(analysis_pid);</p>
+       <p>wait_for_child(exploration_pid);</p>
+       <p>free_sharedboard(board);</p>
+      </div>
+     </div>
+     <div class="mt-6 grid grid-cols-3 gap-4">
+      <div class="bg-slate-900/50 border border-slate-800 rounded-lg p-4">
+       <p class="text-sm font-bold text-red-400 mb-1">⚠️ fflush(NULL)</p>
+       <p class="text-xs text-slate-400">Esvazia todos os buffers ANTES de fork() — sem duplicação de output</p>
+      </div>
+      <div class="bg-slate-900/50 border border-slate-800 rounded-lg p-4">
+       <p class="text-sm font-bold text-emerald-400 mb-1">✓ Ordem</p>
+       <p class="text-xs text-slate-400">CSV antes de forks, então shm, depois forks</p>
+      </div>
+      <div class="bg-slate-900/50 border border-slate-800 rounded-lg p-4">
+       <p class="text-sm font-bold text-cyan-400 mb-1">🔄 waitpid()</p>
+       <p class="text-xs text-slate-400">Aguarda TODOS os filhos; EINTR requer retry</p>
+      </div>
+     </div>
+    </div>
+   </div>
+
+   <!-- SLIDE 3: Fork & Shared Memory -->
+   <div class="slide flex-col items-center justify-center h-full p-12" data-slide="2">
+    <h2 class="text-3xl font-bold mb-2 animate-in">fork() & Memória Compartilhada</h2>
+    <p class="text-slate-400 mb-10 animate-in-delay">Como o IPC fica acessível aos filhos</p>
+    <div class="max-w-6xl w-full grid grid-cols-2 gap-6 animate-in-delay2">
+     <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6">
+      <h3 class="font-bold text-violet-400 mb-3"><i data-lucide="code" class="w-4 h-4 inline"></i> create_process()</h3>
+      <div class="mono text-xs space-y-1 text-slate-300 bg-slate-950 rounded-lg p-4">
+       <p>pid_t create_process(...) {</p>
+       <p class="ml-4 text-amber-300">pid = fork();</p>
+       <p></p>
+       <p class="ml-4 text-slate-600">if (pid &lt; 0) {</p>
+       <p class="ml-8">perror("fork"); exit(1);</p>
+       <p class="ml-4">}</p>
+       <p></p>
+       <p class="ml-4 text-slate-600">if (pid == 0) { <span class="text-violet-400">// CHILD</span></p>
+       <p class="ml-8">register_sig(SIGINT, SIG_IGN);</p>
+       <p class="ml-8">register_sig(SIGTSTP, SIG_IGN);</p>
+       <p class="ml-8">thread_creator(board, fn, N);</p>
+       <p class="ml-8">exit(SUCCESS);</p>
+       <p class="ml-4">}</p>
+       <p class="text-slate-600">// PARENT retorna pid</p>
+       <p>  return pid;</p>
+       <p>}</p>
+      </div>
+     </div>
+     <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6">
+      <h3 class="font-bold text-cyan-400 mb-3"><i data-lucide="database" class="w-4 h-4 inline"></i> initialize_sharedboard()</h3>
+      <div class="mono text-xs space-y-1 text-slate-300 bg-slate-950 rounded-lg p-4">
+       <p><span class="text-violet-400">// Criar segmento SHM</span></p>
+       <p>shmid = shmget(IPC_PRIVATE,</p>
+       <p class="ml-4">sizeof(t_sharedboard),</p>
+       <p class="ml-4">IPC_CREAT | 0666);</p>
+       <p></p>
+       <p><span class="text-violet-400">// Attached ao espaço do processo</span></p>
+       <p>*board = shmat(shmid, NULL, 0);</p>
+       <p></p>
+       <p><span class="text-violet-400">// Inicializar mutex</span></p>
+       <p>board-&gt;board_mutex =</p>
+       <p class="ml-4">PTHREAD_MUTEX_INITIALIZER;</p>
+       <p></p>
+       <p><span class="text-violet-400">// Filhos herdam ptr!</span></p>
+      </div>
+     </div>
+    </div>
+    <div class="mt-6 bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 text-sm">
+     <p class="font-bold text-amber-400 mb-1">🎯 Insight Crítico</p>
+     <p class="text-slate-300">fork() copia o espaço de endereços do PAI. O pointer <span class="mono text-amber-400">board</span> aponta para o MESMO segmento de SHM em ambos os processos. Isto é o truque de IPC!</p>
+    </div>
+   </div>
+
+   <!-- SLIDE 4: Signal Handling -->
+   <div class="slide flex-col items-center justify-center h-full p-12" data-slide="3">
+    <h2 class="text-3xl font-bold mb-2 animate-in">Signal Handling com sigaction()</h2>
+    <p class="text-slate-400 mb-10 animate-in-delay">Porque SIGINT e SIGTSTP funcionam globalmente</p>
+    <div class="max-w-6xl w-full animate-in-delay2">
+     <div class="grid grid-cols-2 gap-6">
+      <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6">
+       <h3 class="font-bold text-red-400 mb-3">register_sig() — Setup</h3>
+       <div class="mono text-xs space-y-1 text-slate-300 bg-slate-950 rounded-lg p-4">
+        <p>void register_sig(int signum,</p>
+        <p class="ml-4">void (*handler)(int)) {</p>
+        <p></p>
+        <p class="ml-4">struct sigaction sa;</p>
+        <p class="ml-4">sa.sa_handler = handler;</p>
+        <p class="ml-4">sigemptyset(&amp;sa.sa_mask);</p>
+        <p class="ml-4">sa.sa_flags = 0;</p>
+        <p></p>
+        <p class="ml-4">sigaction(signum, &amp;sa, NULL);</p>
+        <p>}</p>
+       </div>
+      </div>
+      <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6">
+       <h3 class="font-bold text-emerald-400 mb-3">sig_handler() — Ação</h3>
+       <div class="mono text-xs space-y-1 text-slate-300 bg-slate-950 rounded-lg p-4">
+        <p>void sig_handler(int signum) {</p>
+        <p class="ml-4">if (signum == SIGINT) {</p>
+        <p class="ml-8">if (board != NULL)</p>
+        <p class="ml-12">board-&gt;stop_signal = 1;</p>
+        <p class="ml-4">}</p>
+        <p></p>
+        <p class="ml-4">if (signum == SIGTSTP) {</p>
+        <p class="ml-8">if (board != NULL)</p>
+        <p class="ml-12">board-&gt;pause_analysis =</p>
+        <p class="ml-16">!board-&gt;pause_analysis;</p>
+        <p class="ml-4">}</p>
+        <p>}</p>
+       </div>
+      </div>
+     </div>
+     <div class="mt-6 grid grid-cols-2 gap-6">
+      <div class="bg-slate-900/50 border border-slate-800 rounded-lg p-4">
+       <p class="text-sm font-bold text-red-400 mb-2">Main Process (PAI)</p>
+       <ul class="text-xs text-slate-400 space-y-1">
+        <li>✓ Registra sig_handler para SIGINT</li>
+        <li>✓ Registra sig_handler para SIGTSTP</li>
+        <li>✓ Modifica board→stop_signal ou pause_analysis</li>
+        <li>✓ Threads leem estes flags</li>
+       </ul>
+      </div>
+      <div class="bg-slate-900/50 border border-slate-800 rounded-lg p-4">
+       <p class="text-sm font-bold text-slate-400 mb-2">Child Processes (FILHOS)</p>
+       <ul class="text-xs text-slate-400 space-y-1">
+        <li>✓ Registram SIG_IGN para SIGINT</li>
+        <li>✓ Registram SIG_IGN para SIGTSTP</li>
+        <li>✗ Ignoram sinais! Não reagem</li>
+        <li>⚡ Ainda usam board (shared memory)</li>
+       </ul>
+      </div>
+     </div>
+    </div>
+   </div>
+
+   <!-- SLIDE 5: Thread Creation -->
+   <div class="slide flex-col items-center justify-center h-full p-12" data-slide="4">
+    <h2 class="text-3xl font-bold mb-2 animate-in">thread_creator() — Multithreading</h2>
+    <p class="text-slate-400 mb-10 animate-in-delay">VLA (Variable Length Array) e t_thread_args</p>
+    <div class="max-w-6xl w-full animate-in-delay2">
+     <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6">
+      <div class="mono text-xs space-y-1 text-slate-300 bg-slate-950 rounded-lg p-4">
+       <p>void thread_creator(t_sharedboard *board,</p>
+       <p class="ml-4">void *(*thread_func)(void *),</p>
+       <p class="ml-4">int number_of_threads) {</p>
+       <p></p>
+       <p class="ml-4"><span class="text-violet-400">// VLA — declarado na stack!</span></p>
+       <p class="ml-4">pthread_t tid[number_of_threads];</p>
+       <p class="ml-4">t_thread_args args[number_of_threads];</p>
+       <p></p>
+       <p class="ml-4">srand(time(NULL) / getpid());</p>
+       <p></p>
+       <p class="ml-4"><span class="text-violet-400">// Criar threads</span></p>
+       <p class="ml-4">for (int i = 0; i &lt; number_of_threads; i++) {</p>
+       <p class="ml-8">args[i].board = board;   <span class="text-slate-600">// Shared!</span></p>
+       <p class="ml-8">args[i].thread_id = i;</p>
+       <p></p>
+       <p class="ml-8">pthread_create(&amp;tid[i], NULL,</p>
+       <p class="ml-12">thread_func, (void *)&amp;args[i]);</p>
+       <p class="ml-4">}</p>
+       <p></p>
+       <p class="ml-4"><span class="text-violet-400">// Aguardar todas as threads</span></p>
+       <p class="ml-4">for (int i = 0; i &lt; number_of_threads; i++) {</p>
+       <p class="ml-8">pthread_join(tid[i], NULL);</p>
+       <p class="ml-4">}</p>
+       <p>}</p>
+      </div>
+     </div>
+     <div class="mt-6 grid grid-cols-3 gap-4">
+      <div class="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+       <p class="text-sm font-bold text-red-400 mb-2">⚠️ VLA Stack</p>
+       <p class="text-xs text-slate-400">Arrays na stack! Precisa C99+. Não é portável mas funciona aqui.</p>
+      </div>
+      <div class="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4">
+       <p class="text-sm font-bold text-amber-400 mb-2">🎯 t_thread_args</p>
+       <p class="text-xs text-slate-400">Cada thread recebe o seu ID + pointer para shared board</p>
+      </div>
+      <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-4">
+       <p class="text-sm font-bold text-emerald-400 mb-2">✓ pthread_join()</p>
+       <p class="text-xs text-slate-400">Aguarda que TODAS as threads terminem antes de sair do processo</p>
+      </div>
+     </div>
+    </div>
+   </div>
+
+   <!-- SLIDE 6: Drone Thread Detailed -->
+   <div class="slide flex-col items-center justify-center h-full p-12" data-slide="5">
+    <h2 class="text-3xl font-bold mb-2 animate-in">exploration_thread() — Drone Loop</h2>
+    <p class="text-slate-400 mb-10 animate-in-delay">Produtor: gera, verifica, deposita</p>
+    <div class="max-w-6xl w-full animate-in-delay2">
+     <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6">
+      <div class="mono text-xs space-y-1 text-slate-300 bg-slate-950 rounded-lg p-4 max-h-96 overflow-y-auto">
+       <p>void *exploration_thread(void *arg) {</p>
+       <p class="ml-4">t_thread_args *args = arg;</p>
+       <p class="ml-4">t_sharedboard *board = args-&gt;board;</p>
+       <p class="ml-4">t_sample sample;</p>
+       <p class="ml-4">int id = args-&gt;thread_id;</p>
+       <p></p>
+       <p class="ml-4"><span class="text-violet-400">// Loop principal — continua enquanto stop_signal == 0</span></p>
+       <p class="ml-4">while (!board-&gt;stop_signal) {</p>
+       <p class="ml-8"><span class="text-violet-400">// 1. Simular coleta (5 segundos)</span></p>
+       <p class="ml-8">sleep(DRONE_FINDING_TIME);</p>
+       <p></p>
+       <p class="ml-8"><span class="text-violet-400">// 2. Gerar amostra com dados aleatórios</span></p>
+       <p class="ml-8">sample = generate_sample(id);</p>
+       <p></p>
+       <p class="ml-8"><span class="text-amber-300">pthread_mutex_lock(&amp;board-&gt;board_mutex);</span></p>
+       <p class="ml-8"><span class="text-violet-400">// 3. Verificar se há espaço</span></p>
+       <p class="ml-8">if (board-&gt;count &gt;= STORAGE_CAPACITY) {</p>
+       <p class="ml-12"><span class="text-amber-300">pthread_mutex_unlock(&amp;board-&gt;board_mutex);</span></p>
+       <p class="ml-12">logger(DRONE_LOG, id,</p>
+       <p class="ml-16">"Waiting for space...\\n");</p>
+       <p class="ml-12">continue; <span class="text-slate-600">// retry no próximo loop</span></p>
+       <p class="ml-8">}</p>
+       <p></p>
+       <p class="ml-8"><span class="text-violet-400">// 4. Depositar amostra</span></p>
+       <p class="ml-8">deposit_sample(board, &amp;sample);</p>
+       <p class="ml-8"><span class="text-amber-300">pthread_mutex_unlock(&amp;board-&gt;board_mutex);</span></p>
+       <p></p>
+       <p class="ml-8">logger(DRONE_LOG, id,</p>
+       <p class="ml-12">"Deposited sample\\n");</p>
+       <p class="ml-4">}</p>
+       <p></p>
+       <p class="ml-4">logger(DRONE_LOG, id, "Stopping..\\n");</p>
+       <p class="ml-4">return NULL;</p>
+       <p>}</p>
+      </div>
+     </div>
+     <div class="mt-4 grid grid-cols-2 gap-4">
+      <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-4">
+       <p class="text-sm font-bold text-emerald-400 mb-2">generate_sample()</p>
+       <p class="text-xs text-slate-400">Cria amostra com tipo aleatório, timestamp de coleta</p>
+      </div>
+      <div class="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+       <p class="text-sm font-bold text-red-400 mb-2">⚠️ Unlock Antes de Wait</p>
+       <p class="text-xs text-slate-400">Libertar mutex ANTES de dormir — senão bloqueia threads de análise!</p>
+      </div>
+     </div>
+    </div>
+   </div>
+
+   <!-- SLIDE 7: Analysis Thread Detailed -->
+   <div class="slide flex-col items-center justify-center h-full p-12" data-slide="6">
+    <h2 class="text-3xl font-bold mb-2 animate-in">analysis_thread() — Consumidor Loop</h2>
+    <p class="text-slate-400 mb-10 animate-in-delay">Consumidor: retira, analisa, grava CSV</p>
+    <div class="max-w-6xl w-full animate-in-delay2">
+     <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6">
+      <div class="mono text-xs space-y-1 text-slate-300 bg-slate-950 rounded-lg p-4 max-h-96 overflow-y-auto">
+       <p>void *analysis_thread(void *arg) {</p>
+       <p class="ml-4">t_thread_args *args = arg;</p>
+       <p class="ml-4">t_sharedboard *board = args-&gt;board;</p>
+       <p class="ml-4">t_sample sample;</p>
+       <p class="ml-4">int id = args-&gt;thread_id;</p>
+       <p></p>
+       <p class="ml-4">while (!board-&gt;stop_signal) {</p>
+       <p class="ml-8"><span class="text-amber-300">pthread_mutex_lock(&amp;board-&gt;board_mutex);</span></p>
+       <p class="ml-8"><span class="text-violet-400">// 1. Verificar se há amostras para analisar</span></p>
+       <p class="ml-8">if (board-&gt;count &lt;= 0) {</p>
+       <p class="ml-12"><span class="text-amber-300">pthread_mutex_unlock(&amp;board-&gt;board_mutex);</span></p>
+       <p class="ml-12">logger(ANALYSIS_LOG, id,</p>
+       <p class="ml-16">"Waiting for samples...\\n");</p>
+       <p class="ml-12">sleep(1); <span class="text-slate-600">// Reduz busy-wait</span></p>
+       <p class="ml-12">continue;</p>
+       <p class="ml-8">}</p>
+       <p></p>
+       <p class="ml-8"><span class="text-violet-400">// 2. Retirar amostra</span></p>
+       <p class="ml-8">sample = get_sample(board);</p>
+       <p class="ml-8"><span class="text-amber-300">pthread_mutex_unlock(&amp;board-&gt;board_mutex);</span></p>
+       <p></p>
+       <p class="ml-8"><span class="text-violet-400">// 3. Analisar (fora da seção crítica!)</span></p>
+       <p class="ml-8">analyse_sample(&amp;sample, id);</p>
+       <p></p>
+       <p class="ml-8"><span class="text-violet-400">// 4. Gravar CSV</span></p>
+       <p class="ml-8">append_sample_csv(&amp;sample);</p>
+       <p></p>
+       <p class="ml-8"><span class="text-violet-400">// 5. Verificar pausa (Ctrl+Z)</span></p>
+       <p class="ml-8">while (board-&gt;pause_analysis &amp;&amp;</p>
+       <p class="ml-12">!board-&gt;stop_signal) {</p>
+       <p class="ml-12">logger(ANALYSIS_LOG, id,</p>
+       <p class="ml-16">"Analysis paused...\\n");</p>
+       <p class="ml-12">sleep(1);</p>
+       <p class="ml-8">}</p>
+       <p class="ml-4">}</p>
+       <p></p>
+       <p class="ml-4">logger(ANALYSIS_LOG, id, "Stopping..\\n");</p>
+       <p class="ml-4">return NULL;</p>
+       <p>}</p>
+      </div>
+     </div>
+     <div class="mt-4 grid grid-cols-3 gap-4">
+      <div class="bg-cyan-500/10 border border-cyan-500/30 rounded-lg p-4">
+       <p class="text-sm font-bold text-cyan-400 mb-2">get_sample()</p>
+       <p class="text-xs text-slate-400">Retira do buffer circular, incrementa out, decrementa count</p>
+      </div>
+      <div class="bg-violet-500/10 border border-violet-500/30 rounded-lg p-4">
+       <p class="text-sm font-bold text-violet-400 mb-2">⚡ Análise Fora do Mutex</p>
+       <p class="text-xs text-slate-400">nanosleep(1-3s) SEM mutex — não bloqueia drones!</p>
+      </div>
+      <div class="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4">
+       <p class="text-sm font-bold text-amber-400 mb-2">Pausa com Ctrl+Z</p>
+       <p class="text-xs text-slate-400">SIGTSTP alterna pause_analysis flag</p>
+      </div>
+     </div>
+    </div>
+   </div>
+
+   <!-- SLIDE 8: Circular Buffer & get/deposit -->
+   <div class="slide flex-col items-center justify-center h-full p-12" data-slide="7">
+    <h2 class="text-3xl font-bold mb-2 animate-in">deposit_sample() & get_sample()</h2>
+    <p class="text-slate-400 mb-10 animate-in-delay">Circular buffer com in/out/count</p>
+    <div class="max-w-6xl w-full animate-in-delay2">
+     <div class="grid grid-cols-2 gap-6">
+      <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6">
+       <h3 class="font-bold text-emerald-400 mb-3">deposit_sample() — Produtor</h3>
+       <div class="mono text-xs space-y-1 text-slate-300 bg-slate-950 rounded-lg p-4">
+        <p>void deposit_sample(t_sharedboard *b,</p>
+        <p class="ml-4">t_sample *sample) {</p>
+        <p></p>
+        <p class="ml-4"><span class="text-violet-400">// Timestamp da deposição</span></p>
+        <p class="ml-4">clock_gettime(CLOCK_ID,</p>
+        <p class="ml-8">&amp;sample-&gt;deposited_time);</p>
+        <p></p>
+        <p class="ml-4"><span class="text-violet-400">// Inserir na posição 'in'</span></p>
+        <p class="ml-4">b-&gt;samples[b-&gt;in] = *sample;</p>
+        <p></p>
+        <p class="ml-4"><span class="text-violet-400">// Avanço circular</span></p>
+        <p class="ml-4">b-&gt;in = (b-&gt;in + 1)</p>
+        <p class="ml-8">% STORAGE_CAPACITY;</p>
+        <p></p>
+        <p class="ml-4">b-&gt;count++;</p>
+        <p>}</p>
+       </div>
+      </div>
+      <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6">
+       <h3 class="font-bold text-cyan-400 mb-3">get_sample() — Consumidor</h3>
+       <div class="mono text-xs space-y-1 text-slate-300 bg-slate-950 rounded-lg p-4">
+        <p>t_sample get_sample(</p>
+        <p class="ml-4">t_sharedboard *b) {</p>
+        <p></p>
+        <p class="ml-4"><span class="text-violet-400">// Copiar da posição 'out'</span></p>
+        <p class="ml-4">t_sample *ptr =</p>
+        <p class="ml-8">&amp;b-&gt;samples[b-&gt;out];</p>
+        <p class="ml-4">t_sample local = *ptr;</p>
+        <p></p>
+        <p class="ml-4"><span class="text-violet-400">// Limpar slot</span></p>
+        <p class="ml-4">init_sample(ptr);</p>
+        <p></p>
+        <p class="ml-4"><span class="text-violet-400">// Avanço circular</span></p>
+        <p class="ml-4">b-&gt;out = (b-&gt;out + 1)</p>
+        <p class="ml-8">% STORAGE_CAPACITY;</p>
+        <p></p>
+        <p class="ml-4">b-&gt;count--;</p>
+        <p class="ml-4">return local;</p>
+        <p>}</p>
+       </div>
+      </div>
+     </div>
+     <div class="mt-6 bg-slate-900 border border-slate-700 rounded-2xl p-6">
+      <h3 class="font-bold text-violet-400 mb-3">📊 Circular Buffer Visualization</h3>
+      <div class="text-sm text-slate-400 space-y-2">
+       <p><span class="mono">in=3, out=1, count=2, STORAGE_CAPACITY=10</span></p>
+       <div class="grid grid-cols-10 gap-1 mt-2">
+        <div class="aspect-square rounded bg-slate-800 border border-slate-600 flex items-center justify-center text-xs">—</div>
+        <div class="aspect-square rounded bg-amber-500/30 border border-amber-500/50 flex items-center justify-center text-xs font-bold">out</div>
+        <div class="aspect-square rounded bg-slate-800 border border-slate-600 flex items-center justify-center text-xs">—</div>
+        <div class="aspect-square rounded bg-emerald-500/30 border border-emerald-500/50 flex items-center justify-center text-xs font-bold">in</div>
+        <div class="aspect-square rounded bg-slate-800 border border-slate-600 flex items-center justify-center text-xs">—</div>
+        <div class="aspect-square rounded bg-slate-800 border border-slate-600 flex items-center justify-center text-xs">—</div>
+        <div class="aspect-square rounded bg-slate-800 border border-slate-600 flex items-center justify-center text-xs">—</div>
+        <div class="aspect-square rounded bg-slate-800 border border-slate-600 flex items-center justify-center text-xs">—</div>
+        <div class="aspect-square rounded bg-slate-800 border border-slate-600 flex items-center justify-center text-xs">—</div>
+        <div class="aspect-square rounded bg-slate-800 border border-slate-600 flex items-center justify-center text-xs">—</div>
+       </div>
+       <p class="mt-3"><span class="text-emerald-400">Amostras em buffer:</span> posições 1 e 2 têm dados | <span class="text-slate-500">count=2 confirma</span></p>
+      </div>
+     </div>
+    </div>
+   </div>
+
+   <!-- SLIDE 9: Edge Cases & Tricky Parts -->
+   <div class="slide flex-col items-center justify-center h-full p-12" data-slide="8">
+    <h2 class="text-3xl font-bold mb-2 animate-in">Tricky Cases & Edge Cases</h2>
+    <p class="text-slate-400 mb-10 animate-in-delay">O que pode dar errado e porquê</p>
+    <div class="max-w-6xl w-full space-y-4 animate-in-delay2">
+     <div class="grid grid-cols-2 gap-4">
+      <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-4">
+       <p class="font-bold text-red-400 mb-2">❌ fflush(NULL) Omitido</p>
+       <p class="text-sm text-slate-400">Output duplicado após fork() porque buffers não foram esvaziados</p>
+      </div>
+      <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-4">
+       <p class="font-bold text-red-400 mb-2">❌ Não Unlock Antes de sleep()</p>
+       <p class="text-sm text-slate-400">Drone com mutex locked e sleep(1) bloqueia todas as análises!</p>
+      </div>
+     </div>
+     <div class="grid grid-cols-2 gap-4">
+      <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
+       <p class="font-bold text-amber-400 mb-2">⚠️ EINTR em waitpid()</p>
+       <p class="text-sm text-slate-400">Sinais interrompem waitpid(). Precisa retry em loop se errno==EINTR</p>
+      </div>
+      <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
+       <p class="font-bold text-amber-400 mb-2">⚠️ Buffer Cheio vs Vazio</p>
+       <p class="text-sm text-slate-400">count >= STORAGE: drones esperam | count <= 0: análise espera</p>
+      </div>
+     </div>
+     <div class="grid grid-cols-2 gap-4">
+      <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4">
+       <p class="font-bold text-emerald-400 mb-2">✓ Volatile sig_atomic_t</p>
+       <p class="text-sm text-slate-400">stop_signal e pause_analysis são volatile — flags atómicas, sem race conditions</p>
+      </div>
+      <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4">
+       <p class="font-bold text-emerald-400 mb-2">✓ SHM Persiste</p>
+       <p class="text-sm text-slate-400">Shared memory SEM shmctl() IPC_RMID deixa orphan — precisa limpeza</p>
+      </div>
+     </div>
+    </div>
+   </div>
+
+   <!-- SLIDE 10: Cleanup & Summary -->
+   <div class="slide flex-col items-center justify-center h-full p-12" data-slide="9">
+    <h2 class="text-3xl font-bold mb-2 animate-in">Cleanup & Lições Aprendidas</h2>
+    <p class="text-slate-400 mb-10 animate-in-delay">free_sharedboard() e takeaways</p>
+    <div class="max-w-6xl w-full animate-in-delay2">
+     <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 mb-6">
+      <h3 class="font-bold text-red-400 mb-3">free_sharedboard() — Cleanup</h3>
+      <div class="mono text-xs space-y-1 text-slate-300 bg-slate-950 rounded-lg p-4">
+       <p>void free_sharedboard(t_sharedboard *board) {</p>
+       <p class="ml-4">if (board == NULL) return;</p>
+       <p></p>
+       <p class="ml-4"><span class="text-violet-400">// Destruir mutexes</span></p>
+       <p class="ml-4">pthread_mutex_destroy(&amp;board-&gt;board_mutex);</p>
+       <p class="ml-4">pthread_mutex_destroy(&amp;board-&gt;log_mutex);</p>
+       <p></p>
+       <p class="ml-4"><span class="text-violet-400">// Desattach da SHM</span></p>
+       <p class="ml-4">shmdt(board);</p>
+       <p class="ml-4"><span class="text-slate-600">// Nota: shmctl(id, IPC_RMID) não chamado aqui!</span></p>
+       <p>}</p>
+      </div>
+     </div>
+     <div class="grid grid-cols-2 gap-6">
+      <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6">
+       <h3 class="font-bold text-emerald-400 mb-3">🎯 Key Takeaways</h3>
+       <ul class="text-sm text-slate-300 space-y-2">
+        <li>✓ fork() copia espaço — SHM é herdado</li>
+        <li>✓ sigaction() é melhor que signal()</li>
+        <li>✓ fflush antes de fork evita duplicação</li>
+        <li>✓ Mutex protege seções críticas</li>
+        <li>✓ Unlock ANTES de sleep/wait</li>
+        <li>✓ volatile sig_atomic_t para flags</li>
+       </ul>
+      </div>
+      <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6">
+       <h3 class="font-bold text-violet-400 mb-3">⚡ Design Patterns</h3>
+       <ul class="text-sm text-slate-300 space-y-2">
+        <li>✓ Producer-Consumer com circular buffer</li>
+        <li>✓ Mutex para seções críticas apenas</li>
+        <li>✓ sleep() reduz CPU busy-wait</li>
+        <li>✓ Check-then-act com mutex protegido</li>
+        <li>✓ IPC via shared memory + semáforos</li>
+        <li>✓ Signal handlers para controlo global</li>
+       </ul>
+      </div>
+     </div>
+    </div>
+   </div>
+
+   <!-- Navigation -->
+   <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 z-50">
+    <button id="prev-btn" class="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center hover:bg-slate-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+     <i data-lucide="chevron-left" class="w-5 h-5"></i>
+    </button>
+    <div id="dots" class="flex gap-2"></div>
+    <button id="next-btn" class="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center hover:bg-slate-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+     <i data-lucide="chevron-right" class="w-5 h-5"></i>
+    </button>
+   </div>
+  </div>
+
+  <script>
+    const defaultConfig = {
+      presentation_title: 'Deep Dive: Exploração com Drones',
+      background_color: '#020617',
+      surface_color: '#0f172a',
+      text_color: '#ffffff',
+      primary_color: '#a78bfa',
+      secondary_color: '#ec4899',
+      font_family: 'Outfit',
+      font_size: 16
+    };
+
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+
+    function renderSlides() {
+      slides.forEach((s, i) => {
+        s.classList.toggle('active', i === currentSlide);
+      });
+      document.getElementById('counter').textContent = `${currentSlide + 1} / ${totalSlides}`;
+      document.getElementById('progress').style.width = `${((currentSlide + 1) / totalSlides) * 100}%`;
+      document.getElementById('prev-btn').disabled = currentSlide === 0;
+      document.getElementById('next-btn').disabled = currentSlide === totalSlides - 1;
+      renderDots();
+    }
+
+    function renderDots() {
+      const dotsEl = document.getElementById('dots');
+      dotsEl.innerHTML = '';
+      for (let i = 0; i < totalSlides; i++) {
+        const dot = document.createElement('button');
+        dot.className = `w-2 h-2 rounded-full transition-all ${i === currentSlide ? 'bg-violet-400 w-6' : 'bg-slate-600 hover:bg-slate-500'}`;
+        dot.onclick = () => { currentSlide = i; renderSlides(); };
+        dotsEl.appendChild(dot);
+      }
+    }
+
+    document.getElementById('prev-btn').onclick = () => { if (currentSlide > 0) { currentSlide--; renderSlides(); } };
+    document.getElementById('next-btn').onclick = () => { if (currentSlide < totalSlides - 1) { currentSlide++; renderSlides(); } };
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); if (currentSlide < totalSlides - 1) { currentSlide++; renderSlides(); } }
+      if (e.key === 'ArrowLeft') { if (currentSlide > 0) { currentSlide--; renderSlides(); } }
+    });
+
+    renderSlides();
+    lucide.createIcons();
+
+    window.elementSdk.init({
+      defaultConfig,
+      onConfigChange: async (config) => {
+        document.querySelector('h1').textContent = config.presentation_title || defaultConfig.presentation_title;
+        document.body.style.backgroundColor = config.background_color || defaultConfig.background_color;
+        const font = config.font_family || defaultConfig.font_family;
+        document.body.style.fontFamily = `${font}, Outfit, sans-serif`;
+      },
+      mapToCapabilities: (config) => ({
+        recolorables: [
+          { get: () => config.background_color || defaultConfig.background_color, set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
+          { get: () => config.surface_color || defaultConfig.surface_color, set: (v) => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); } },
+          { get: () => config.text_color || defaultConfig.text_color, set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
+          { get: () => config.primary_color || defaultConfig.primary_color, set: (v) => { config.primary_color = v; window.elementSdk.setConfig({ primary_color: v }); } },
+          { get: () => config.secondary_color || defaultConfig.secondary_color, set: (v) => { config.secondary_color = v; window.elementSdk.setConfig({ secondary_color: v }); } }
+        ],
+        borderables: [],
+        fontEditable: { get: () => config.font_family || defaultConfig.font_family, set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); } },
+        fontSizeable: { get: () => config.font_size || defaultConfig.font_size, set: (v) => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); } }
+      }),
+      mapToEditPanelValues: (config) => new Map([
+        ['presentation_title', config.presentation_title || defaultConfig.presentation_title]
+      ])
+    });
+  </script>
+ </body>
+</html>
