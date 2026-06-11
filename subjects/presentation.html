@@ -46,7 +46,7 @@
    </div><!-- SLIDE 2: Architecture Overview -->
    <div class="slide flex-col items-center justify-center h-full p-12" data-slide="1">
     <h2 class="text-3xl font-bold mb-2 animate-in">Arquitetura do Sistema</h2>
-    <p class="text-slate-400 mb-10 animate-in-delay">1 Processo Principal + 2 Processos Filhos (fork) + 7 Threads</p>
+    <p class="text-slate-400 mb-10 animate-in-delay">1 Processo Principal + 2 Processos Filhos (fork) + 5 Threads</p>
     <div class="grid grid-cols-3 gap-6 max-w-4xl w-full animate-in-delay2">
      <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 text-center hover:border-amber-500/50 transition-colors">
       <div class="w-14 h-14 rounded-xl bg-amber-500/10 flex items-center justify-center mx-auto mb-4">
@@ -63,9 +63,9 @@
        <i data-lucide="navigation" class="w-7 h-7 text-emerald-400"></i>
       </div>
       <h3 class="font-bold text-lg">Child: Exploração</h3>
-      <p class="text-slate-400 text-sm mt-2">5 threads drone. sleep(5s), deposita amostras</p>
+      <p class="text-slate-400 text-sm mt-2">3 threads drone. sleep(5s), deposita amostras</p>
       <div class="mono text-xs text-emerald-400 mt-3 bg-emerald-500/10 rounded px-2 py-1 inline-block">
-       #define NUMBER_OF_DRONES_THREADS 5
+       #define NUMBER_OF_DRONES_THREADS 3
       </div>
      </div>
      <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 text-center hover:border-cyan-500/50 transition-colors">
@@ -333,7 +333,7 @@
     <h2 class="text-4xl font-bold animate-in-delay">Resumo</h2>
     <div class="mt-8 max-w-xl text-left space-y-3 animate-in-delay2">
      <p class="flex items-center gap-3 text-slate-300"><span class="w-2 h-2 rounded-full bg-amber-400"></span> 1 processo principal + 2 processos filhos (fork)</p>
-     <p class="flex items-center gap-3 text-slate-300"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> 5 threads drone + 2 threads braço robótico</p>
+     <p class="flex items-center gap-3 text-slate-300"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> 3 threads drone + 2 threads braço robótico</p>
      <p class="flex items-center gap-3 text-slate-300"><span class="w-2 h-2 rounded-full bg-cyan-400"></span> Shared memory para IPC entre processos</p>
      <p class="flex items-center gap-3 text-slate-300"><span class="w-2 h-2 rounded-full bg-violet-400"></span> Semáforos + Mutex para sincronização</p>
      <p class="flex items-center gap-3 text-slate-300"><span class="w-2 h-2 rounded-full bg-red-400"></span> Sinais para controlo (SIGTSTP, SIGINT)</p>
