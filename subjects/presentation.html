@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="pt" class="h-full">
+ <head><script src="/_sdk/telemetry_sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&amp;family=Outfit:wght@300;500;700;900&amp;display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Outfit', sans-serif; }
+    code, .mono { font-family: 'JetBrains Mono', monospace; }
+    .slide { display: none; }
+    .slide.active { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-in { animation: fadeIn 0.5s ease forwards; }
+    .animate-in-delay { animation: fadeIn 0.5s ease 0.2s forwards; opacity: 0; }
+    .animate-in-delay2 { animation: fadeIn 0.5s ease 0.4s forwards; opacity: 0; }
+    @keyframes pulse-dot { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.3); } }
+    .pulse-dot { animation: pulse-dot 2s infinite; }
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+    .float { animation: float 3s ease-in-out infinite; }
+    .progress-bar { transition: width 0.3s ease; }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full w-full bg-slate-950 text-white overflow-hidden">
+  <div id="app" class="h-full w-full relative flex flex-col">
+   <!-- Progress bar -->
+   <div class="absolute top-0 left-0 right-0 h-1 bg-slate-800 z-50">
+    <div id="progress" class="progress-bar h-full bg-gradient-to-r from-emerald-400 to-cyan-400"></div>
+   </div><!-- Slide counter -->
+   <div id="counter" class="absolute top-4 right-6 text-sm text-slate-500 mono z-50"></div><!-- SLIDE 1: Title -->
+   <div class="slide active flex-col items-center justify-center h-full p-12 text-center" data-slide="0">
+    <div class="animate-in">
+     <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm mb-8">
+      <span class="w-2 h-2 rounded-full bg-emerald-400 pulse-dot inline-block"></span> Sistemas Operativos
+     </div>
+    </div>
+    <h1 id="main-title" class="text-5xl md:text-7xl font-900 animate-in-delay bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent leading-tight max-w-4xl">Sistema de Exploração com Drones</h1>
+    <p class="text-xl text-slate-400 mt-6 animate-in-delay2 max-w-2xl">Processos, Threads &amp; Sincronização com Memória Partilhada</p>
+    <div class="mt-12 animate-in-delay2 flex items-center gap-2 text-slate-600 text-sm">
+     <i data-lucide="arrow-right" class="w-4 h-4"></i> Use as setas para navegar
+    </div>
+   </div><!-- SLIDE 2: Architecture Overview -->
+   <div class="slide flex-col items-center justify-center h-full p-12" data-slide="1">
+    <h2 class="text-3xl font-bold mb-2 animate-in">Arquitetura do Sistema</h2>
+    <p class="text-slate-400 mb-10 animate-in-delay">1 Processo Principal + 2 Processos Filhos (fork) + 7 Threads</p>
+    <div class="grid grid-cols-3 gap-6 max-w-4xl w-full animate-in-delay2">
+     <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 text-center hover:border-amber-500/50 transition-colors">
+      <div class="w-14 h-14 rounded-xl bg-amber-500/10 flex items-center justify-center mx-auto mb-4">
+       <i data-lucide="cpu" class="w-7 h-7 text-amber-400"></i>
+      </div>
+      <h3 class="font-bold text-lg">Main Process</h3>
+      <p class="text-slate-400 text-sm mt-2">fork() × 2. Cria shared memory, aguarda filhos com waitpid()</p>
+      <div class="mono text-xs text-amber-400 mt-3 bg-amber-500/10 rounded px-2 py-1 inline-block">
+       shmget() + fork() + waitpid()
+      </div>
+     </div>
+     <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 text-center hover:border-emerald-500/50 transition-colors">
+      <div class="w-14 h-14 rounded-xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-4">
+       <i data-lucide="navigation" class="w-7 h-7 text-emerald-400"></i>
+      </div>
+      <h3 class="font-bold text-lg">Child: Exploração</h3>
+      <p class="text-slate-400 text-sm mt-2">5 threads drone. sleep(5s), deposita amostras</p>
+      <div class="mono text-xs text-emerald-400 mt-3 bg-emerald-500/10 rounded px-2 py-1 inline-block">
+       #define NUMBER_OF_DRONES_THREADS 5
+      </div>
+     </div>
+     <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 text-center hover:border-cyan-500/50 transition-colors">
+      <div class="w-14 h-14 rounded-xl bg-cyan-500/10 flex items-center justify-center mx-auto mb-4">
+       <i data-lucide="microscope" class="w-7 h-7 text-cyan-400"></i>
+      </div>
+      <h3 class="font-bold text-lg">Child: Análise</h3>
+      <p class="text-slate-400 text-sm mt-2">2 threads braço. nanosleep(1-3s), registra CSV</p>
+      <div class="mono text-xs text-cyan-400 mt-3 bg-cyan-500/10 rounded px-2 py-1 inline-block">
+       #define NUMBER_OF_ANALYSIS_THREADS 2
+      </div>
+     </div>
+    </div>
+   </div><!-- SLIDE 3: Shared Memory & Tabuleiro -->
+   <div class="slide flex-col items-center justify-center h-full p-12" data-slide="2">
+    <h2 class="text-3xl font-bold mb-2 animate-in">Memória Partilhada</h2>
+    <p class="text-slate-400 mb-10 animate-in-delay">Tabuleiro com 10 compartimentos — zona crítica</p>
+    <div class="max-w-3xl w-full animate-in-delay2">
+     <div class="bg-slate-900 border border-slate-700 rounded-2xl p-8">
+      <div class="flex items-center gap-3 mb-6">
+       <i data-lucide="database" class="w-5 h-5 text-violet-400"></i> <span class="font-bold">Tabuleiro de Amostras</span> <span class="mono text-xs text-slate-500 ml-auto">#define MAX_SAMPLES 10</span>
+      </div>
+      <div class="grid grid-cols-10 gap-2 mb-6">
+       <div class="aspect-square rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-xs mono text-emerald-400">
+        1
+       </div>
+       <div class="aspect-square rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-xs mono text-emerald-400">
+        2
+       </div>
+       <div class="aspect-square rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-xs mono text-emerald-400">
+        3
+       </div>
+       <div class="aspect-square rounded-lg bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-xs mono text-cyan-400">
+        4
+       </div>
+       <div class="aspect-square rounded-lg bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-xs mono text-cyan-400">
+        5
+       </div>
+       <div class="aspect-square rounded-lg bg-slate-800 border border-slate-600 flex items-center justify-center text-xs mono text-slate-500">
+        —
+       </div>
+       <div class="aspect-square rounded-lg bg-slate-800 border border-slate-600 flex items-center justify-center text-xs mono text-slate-500">
+        —
+       </div>
+       <div class="aspect-square rounded-lg bg-slate-800 border border-slate-600 flex items-center justify-center text-xs mono text-slate-500">
+        —
+       </div>
+       <div class="aspect-square rounded-lg bg-slate-800 border border-slate-600 flex items-center justify-center text-xs mono text-slate-500">
+        —
+       </div>
+       <div class="aspect-square rounded-lg bg-slate-800 border border-slate-600 flex items-center justify-center text-xs mono text-slate-500">
+        —
+       </div>
+      </div>
+      <div class="flex gap-4 text-sm">
+       <span class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-emerald-500/40"></span> Depositado por drone</span> <span class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-cyan-500/40"></span> Em análise</span> <span class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-slate-700"></span> Vazio</span>
+      </div>
+     </div>
+     <div class="mt-6 grid grid-cols-2 gap-4">
+      <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-4">
+       <p class="text-sm font-bold text-violet-400 mb-1">Produtor → Consumidor</p>
+       <p class="text-xs text-slate-400">Drones depositam, braços retiram. Padrão clássico com mutexes.</p>
+      </div>
+      <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-4">
+       <p class="text-sm font-bold text-violet-400 mb-1">Sincronização</p>
+       <p class="text-xs text-slate-400">pthread_mutex_lock/unlock + contador count para evitar race conditions.</p>
+      </div>
+     </div>
+    </div>
+   </div><!-- SLIDE 4b: Real Implementation -->
+   <div class="slide flex-col items-center justify-center h-full p-12" data-slide="3b">
+    <h2 class="text-3xl font-bold mb-2 animate-in">Estrutura Compartilhada (Real)</h2>
+    <p class="text-slate-400 mb-10 animate-in-delay">t_sharedboard — dados do IPC</p>
+    <div class="max-w-3xl w-full animate-in-delay2">
+     <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6">
+      <div class="mono text-xs space-y-1 text-slate-300 bg-slate-950 rounded-lg p-4">
+       <p class="text-violet-400">typedef struct s_sharedboard</p>
+       <p class="text-slate-500">{</p>
+       <p class="ml-4">t_sample samples<span class="text-slate-500">[STORAGE_CAPACITY];</span> <span class="text-slate-600">// 10 slots</span></p>
+       <p class="ml-4">int in; <span class="text-slate-600">// índice entrada (drone)</span></p>
+       <p class="ml-4">int out; <span class="text-slate-600">// índice saída (análise)</span></p>
+       <p class="ml-4">int count; <span class="text-slate-600">// quantas amostras tem</span></p>
+       <p class="ml-4">pthread_mutex_t <span class="text-emerald-400">board_mutex</span>;</p>
+       <p class="ml-4">pthread_mutex_t <span class="text-emerald-400">log_mutex</span>;</p>
+       <p class="ml-4">volatile sig_atomic_t <span class="text-cyan-400">stop_signal</span>; <span class="text-slate-600">// SIGINT (Ctrl+C)</span></p>
+       <p class="ml-4">volatile sig_atomic_t <span class="text-cyan-400">pause_analysis</span>; <span class="text-slate-600">// SIGTSTP (Ctrl+Z)</span></p>
+       <p class="text-slate-500">} t_sharedboard;</p>
+      </div>
+      <div class="mt-6 grid grid-cols-2 gap-4 text-sm">
+       <div class="bg-slate-900/50 rounded-lg p-3 border border-slate-700">
+        <p class="font-bold text-emerald-400 mb-1">shmget/shmat:</p>
+        <p class="text-slate-400 text-xs">Main cria, ambos filhos referenciam</p>
+       </div>
+       <div class="bg-slate-900/50 rounded-lg p-3 border border-slate-700">
+        <p class="font-bold text-violet-400 mb-1">Circular Buffer:</p>
+        <p class="text-slate-400 text-xs">in/out com modulo STORAGE_CAPACITY (10)</p>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div><!-- SLIDE 4: Synchronization -->
+   <div class="slide flex-col items-center justify-center h-full p-12" data-slide="3">
+    <h2 class="text-3xl font-bold mb-2 animate-in">Sincronização</h2>
+    <p class="text-slate-400 mb-10 animate-in-delay">Mutex + Busy-wait com sleep() — Sem esperas ativas pesadas</p>
+    <div class="max-w-4xl w-full grid grid-cols-2 gap-8 animate-in-delay2">
+     <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6">
+      <h3 class="font-bold text-emerald-400 mb-4 flex items-center gap-2"><i data-lucide="lock" class="w-4 h-4"></i> Mecanismos</h3>
+      <ul class="space-y-3 text-sm">
+       <li class="flex items-start gap-3"><span class="w-2 h-2 rounded-full bg-emerald-400 mt-1.5 shrink-0"></span> <span><span class="mono text-emerald-300">board_mutex</span> — protege acesso ao tabuleiro</span></li>
+       <li class="flex items-start gap-3"><span class="w-2 h-2 rounded-full bg-cyan-400 mt-1.5 shrink-0"></span> <span><span class="mono text-cyan-300">log_mutex</span> — protege output sincronizado</span></li>
+       <li class="flex items-start gap-3"><span class="w-2 h-2 rounded-full bg-violet-400 mt-1.5 shrink-0"></span> <span><span class="mono text-violet-300">count + sleep()</span> — verificação com retry (busy-wait reduzido)</span></li>
+      </ul>
+     </div>
+     <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6">
+      <h3 class="font-bold text-cyan-400 mb-4 flex items-center gap-2"><i data-lucide="code" class="w-4 h-4"></i> Padrão Real</h3>
+      <div class="mono text-xs space-y-1 text-slate-300 bg-slate-950 rounded-lg p-4">
+       <p class="text-slate-500">// Drone (Produtor)</p>
+       <p>pthread_mutex_lock(<span class="text-emerald-400">&amp;board-&gt;board_mutex</span>);</p>
+       <p class="text-slate-600">if (board-&gt;count &gt;= STORAGE_CAPACITY) {</p>
+       <p class="ml-4">pthread_mutex_unlock(<span class="text-emerald-400">&amp;board-&gt;board_mutex</span>);</p>
+       <p class="ml-4">logger(DRONE_LOG, id, <span class="text-amber-300">"Waiting for space..."</span>);</p>
+       <p class="ml-4 text-orange-300">sleep(1);</p>
+       <p class="ml-4 text-slate-600">// retry no próximo loop...</p>
+       <p class="text-slate-600">}</p>
+       <p class="text-amber-300">deposit_sample(board, &amp;sample);</p>
+       <p>pthread_mutex_unlock(<span class="text-emerald-400">&amp;board-&gt;board_mutex</span>);</p>
+       <p class="mt-3 text-slate-500">// Braço (Consumidor)</p>
+       <p>pthread_mutex_lock(<span class="text-emerald-400">&amp;board-&gt;board_mutex</span>);</p>
+       <p class="text-slate-600">if (board-&gt;count &lt;= 0) {</p>
+       <p class="ml-4">pthread_mutex_unlock(<span class="text-emerald-400">&amp;board-&gt;board_mutex</span>);</p>
+       <p class="ml-4">logger(ANALYSIS_LOG, id, <span class="text-amber-300">"Waiting for samples..."</span>);</p>
+       <p class="ml-4 text-orange-300">sleep(1);</p>
+       <p class="ml-4 text-slate-600">// retry no próximo loop...</p>
+       <p class="text-slate-600">}</p>
+       <p class="text-amber-300">local_sample = get_sample(board);</p>
+       <p>pthread_mutex_unlock(<span class="text-emerald-400">&amp;board-&gt;board_mutex</span>);</p>
+      </div>
+     </div>
+    </div>
+   </div><!-- SLIDE 5: Signals -->
+   <div class="slide flex-col items-center justify-center h-full p-12" data-slide="4">
+    <h2 class="text-3xl font-bold mb-2 animate-in">Sinais (Signals)</h2>
+    <p class="text-slate-400 mb-10 animate-in-delay">Controlo do sistema via SIGTSTP e SIGINT</p>
+    <div class="max-w-3xl w-full space-y-6 animate-in-delay2">
+     <div class="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 flex items-start gap-5">
+      <div class="w-16 h-16 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
+       <span class="mono text-amber-400 text-sm font-bold">Ctrl+Z</span>
+      </div>
+      <div>
+       <h3 class="font-bold text-lg text-amber-400">SIGTSTP — Toggle Análise</h3>
+       <p class="text-slate-400 text-sm mt-1">Ativa/desativa o módulo de análise. Quando desativado, braços entram em standby (bloqueados num semáforo ou flag condicional).</p>
+       <div class="mono text-xs text-slate-500 mt-3 bg-slate-950 rounded px-3 py-2">
+        signal(SIGTSTP, toggle_analysis_handler);
+       </div>
+      </div>
+     </div>
+     <div class="bg-slate-900 border border-red-500/30 rounded-2xl p-6 flex items-start gap-5">
+      <div class="w-16 h-16 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
+       <span class="mono text-red-400 text-sm font-bold">Ctrl+C</span>
+      </div>
+      <div>
+       <h3 class="font-bold text-lg text-red-400">SIGINT — Terminação Limpa</h3>
+       <p class="text-slate-400 text-sm mt-1">Termina todos os processos e threads. Liberta shared memory (shmdt + shmctl), destrói semáforos e mutex.</p>
+       <div class="mono text-xs text-slate-500 mt-3 bg-slate-950 rounded px-3 py-2">
+        signal(SIGINT, cleanup_handler);
+       </div>
+      </div>
+     </div>
+    </div>
+   </div><!-- SLIDE 6: Process/Thread Map -->
+   <div class="slide flex-col items-center justify-center h-full p-12" data-slide="5">
+    <h2 class="text-3xl font-bold mb-2 animate-in">Mapa de Processos &amp; Threads</h2>
+    <p class="text-slate-400 mb-10 animate-in-delay">Hierarquia completa do sistema</p>
+    <div class="max-w-3xl w-full animate-in-delay2">
+     <div class="bg-slate-900 border border-slate-700 rounded-2xl p-8">
+      <!-- Tree -->
+      <div class="space-y-4">
+       <div class="flex items-center gap-3">
+        <div class="w-4 h-4 rounded bg-amber-500"></div><span class="font-bold">Módulo Principal</span> <span class="mono text-xs text-slate-500">— processo pai (PID principal)</span>
+       </div>
+       <div class="ml-8 border-l-2 border-slate-700 pl-6 space-y-4">
+        <div>
+         <div class="flex items-center gap-3">
+          <div class="w-4 h-4 rounded bg-emerald-500"></div><span class="font-bold">Módulo Exploração</span> <span class="mono text-xs text-slate-500">— processo filho (fork)</span>
+         </div>
+         <div class="ml-8 border-l-2 border-slate-700 pl-6 mt-3 space-y-2">
+          <div class="flex items-center gap-2 text-sm text-slate-300"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Thread Drone 1 <span class="mono text-xs text-slate-600">pthread_create</span>
+          </div>
+          <div class="flex items-center gap-2 text-sm text-slate-300"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Thread Drone 2
+          </div>
+          <div class="flex items-center gap-2 text-sm text-slate-300"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Thread Drone 3
+          </div>
+          <div class="flex items-center gap-2 text-sm text-slate-300"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Thread Drone 4
+          </div>
+          <div class="flex items-center gap-2 text-sm text-slate-300"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Thread Drone 5
+          </div>
+         </div>
+        </div>
+        <div>
+         <div class="flex items-center gap-3">
+          <div class="w-4 h-4 rounded bg-cyan-500"></div><span class="font-bold">Módulo Análise</span> <span class="mono text-xs text-slate-500">— processo filho (fork)</span>
+         </div>
+         <div class="ml-8 border-l-2 border-slate-700 pl-6 mt-3 space-y-2">
+          <div class="flex items-center gap-2 text-sm text-slate-300"><span class="w-2 h-2 rounded-full bg-cyan-400"></span> Thread Braço Robótico 1 <span class="mono text-xs text-slate-600">pthread_create</span>
+          </div>
+          <div class="flex items-center gap-2 text-sm text-slate-300"><span class="w-2 h-2 rounded-full bg-cyan-400"></span> Thread Braço Robótico 2
+          </div>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div><!-- SLIDE 7: Output Format -->
+   <div class="slide flex-col items-center justify-center h-full p-12" data-slide="6">
+    <h2 class="text-3xl font-bold mb-2 animate-in">Formato de Output</h2>
+    <p class="text-slate-400 mb-10 animate-in-delay">Tabulação diferenciada por entidade</p>
+    <div class="max-w-3xl w-full animate-in-delay2">
+     <div class="bg-slate-950 border border-slate-700 rounded-2xl p-6 mono text-sm space-y-2">
+      <p><span class="text-amber-400">[Principal]</span> <span class="text-slate-400">\t</span> Sistema inicializado. Shared memory criada.</p>
+      <p><span class="text-amber-400">[Principal]</span> <span class="text-slate-400">\t</span> Módulos lançados com sucesso.</p>
+      <p><span class="text-emerald-400">[Drone 1]</span> <span class="text-slate-400">\t\t\t</span> Amostra recolhida. A depositar...</p>
+      <p><span class="text-emerald-400">[Drone 2]</span> <span class="text-slate-400">\t\t\t</span> Amostra recolhida. A depositar...</p>
+      <p><span class="text-emerald-400">[Drone 1]</span> <span class="text-slate-400">\t\t\t</span> Amostra depositada no slot 1.</p>
+      <p><span class="text-cyan-400">[Braço 1]</span> <span class="text-slate-400">\t\t\t\t\t</span> Amostra retirada do slot 1.</p>
+      <p><span class="text-cyan-400">[Braço 1]</span> <span class="text-slate-400">\t\t\t\t\t</span> Análise concluída (2.3s).</p>
+      <p><span class="text-red-400">[Sistema]</span> <span class="text-slate-400">\t</span> SIGTSTP recebido. Análise desativada.</p>
+      <p><span class="text-emerald-400">[Drone 3]</span> <span class="text-slate-400">\t\t\t</span> Amostra depositada no slot 2.</p>
+      <p><span class="text-red-400">[Sistema]</span> <span class="text-slate-400">\t</span> SIGINT recebido. A terminar...</p>
+     </div>
+    </div>
+   </div><!-- SLIDE 8: Key Considerations -->
+   <div class="slide flex-col items-center justify-center h-full p-12" data-slide="7">
+    <h2 class="text-3xl font-bold mb-2 animate-in">Considerações-Chave</h2>
+    <p class="text-slate-400 mb-10 animate-in-delay">Requisitos críticos do projeto</p>
+    <div class="max-w-3xl w-full grid grid-cols-2 gap-5 animate-in-delay2">
+     <div class="bg-slate-900 border border-slate-700 rounded-xl p-5">
+      <div class="flex items-center gap-2 text-red-400 font-bold mb-2"><i data-lucide="alert-triangle" class="w-4 h-4"></i> Sem Esperas Ativas
+      </div>
+      <p class="text-sm text-slate-400">Usar sleep() para reduzir CPU com busy-wait. Mutex protege acesso crítico.</p>
+     </div>
+     <div class="bg-slate-900 border border-slate-700 rounded-xl p-5">
+      <div class="flex items-center gap-2 text-emerald-400 font-bold mb-2"><i data-lucide="shield-check" class="w-4 h-4"></i> Race Conditions
+      </div>
+      <p class="text-sm text-slate-400">Mutex protege toda operação no tabuleiro. Acesso atómico garantido.</p>
+     </div>
+     <div class="bg-slate-900 border border-slate-700 rounded-xl p-5">
+      <div class="flex items-center gap-2 text-cyan-400 font-bold mb-2"><i data-lucide="trash-2" class="w-4 h-4"></i> Cleanup
+      </div>
+      <p class="text-sm text-slate-400">shmdt, shmctl, sem_destroy, pthread_join — tudo no handler de SIGINT.</p>
+     </div>
+     <div class="bg-slate-900 border border-slate-700 rounded-xl p-5">
+      <div class="flex items-center gap-2 text-violet-400 font-bold mb-2"><i data-lucide="hash" class="w-4 h-4"></i> #define
+      </div>
+      <p class="text-sm text-slate-400">MAX_SAMPLES=10, NUM_DRONES=3, COLLECT_TIME=5 — fácil configuração.</p>
+     </div>
+    </div>
+   </div><!-- SLIDE 9: Summary -->
+   <div class="slide flex-col items-center justify-center h-full p-12 text-center" data-slide="8">
+    <div class="animate-in">
+     <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center mx-auto mb-8 float">
+      <i data-lucide="check-circle" class="w-10 h-10 text-white"></i>
+     </div>
+    </div>
+    <h2 class="text-4xl font-bold animate-in-delay">Resumo</h2>
+    <div class="mt-8 max-w-xl text-left space-y-3 animate-in-delay2">
+     <p class="flex items-center gap-3 text-slate-300"><span class="w-2 h-2 rounded-full bg-amber-400"></span> 1 processo principal + 2 processos filhos (fork)</p>
+     <p class="flex items-center gap-3 text-slate-300"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> 5 threads drone + 2 threads braço robótico</p>
+     <p class="flex items-center gap-3 text-slate-300"><span class="w-2 h-2 rounded-full bg-cyan-400"></span> Shared memory para IPC entre processos</p>
+     <p class="flex items-center gap-3 text-slate-300"><span class="w-2 h-2 rounded-full bg-violet-400"></span> Semáforos + Mutex para sincronização</p>
+     <p class="flex items-center gap-3 text-slate-300"><span class="w-2 h-2 rounded-full bg-red-400"></span> Sinais para controlo (SIGTSTP, SIGINT)</p>
+    </div>
+    <p class="text-slate-500 mt-10 animate-in-delay2 text-sm">Obrigado! Questões?</p>
+   </div><!-- Navigation -->
+   <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 z-50">
+    <button id="prev-btn" class="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center hover:bg-slate-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"> <i data-lucide="chevron-left" class="w-5 h-5"></i> </button>
+    <div id="dots" class="flex gap-2"></div><button id="next-btn" class="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center hover:bg-slate-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"> <i data-lucide="chevron-right" class="w-5 h-5"></i> </button>
+   </div>
+  </div>
+  <script>
+    const defaultConfig = {
+      presentation_title: 'Sistema de Exploração com Drones',
+      background_color: '#020617',
+      surface_color: '#0f172a',
+      text_color: '#ffffff',
+      primary_color: '#34d399',
+      secondary_color: '#22d3ee',
+      font_family: 'Outfit',
+      font_size: 16
+    };
+
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+
+    function renderSlides() {
+      slides.forEach((s, i) => {
+        s.classList.toggle('active', i === currentSlide);
+      });
+      document.getElementById('counter').textContent = `${currentSlide + 1} / ${totalSlides}`;
+      document.getElementById('progress').style.width = `${((currentSlide + 1) / totalSlides) * 100}%`;
+      document.getElementById('prev-btn').disabled = currentSlide === 0;
+      document.getElementById('next-btn').disabled = currentSlide === totalSlides - 1;
+      renderDots();
+    }
+
+    function renderDots() {
+      const dotsEl = document.getElementById('dots');
+      dotsEl.innerHTML = '';
+      for (let i = 0; i < totalSlides; i++) {
+        const dot = document.createElement('button');
+        dot.className = `w-2 h-2 rounded-full transition-all ${i === currentSlide ? 'bg-emerald-400 w-6' : 'bg-slate-600 hover:bg-slate-500'}`;
+        dot.onclick = () => { currentSlide = i; renderSlides(); };
+        dotsEl.appendChild(dot);
+      }
+    }
+
+    document.getElementById('prev-btn').onclick = () => { if (currentSlide > 0) { currentSlide--; renderSlides(); } };
+    document.getElementById('next-btn').onclick = () => { if (currentSlide < totalSlides - 1) { currentSlide++; renderSlides(); } };
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); if (currentSlide < totalSlides - 1) { currentSlide++; renderSlides(); } }
+      if (e.key === 'ArrowLeft') { if (currentSlide > 0) { currentSlide--; renderSlides(); } }
+    });
+
+    renderSlides();
+    lucide.createIcons();
+
+    // Element SDK
+    window.elementSdk.init({
+      defaultConfig,
+      onConfigChange: async (config) => {
+        document.getElementById('main-title').textContent = config.presentation_title || defaultConfig.presentation_title;
+        document.body.style.backgroundColor = config.background_color || defaultConfig.background_color;
+        const font = config.font_family || defaultConfig.font_family;
+        document.body.style.fontFamily = `${font}, Outfit, sans-serif`;
+      },
+      mapToCapabilities: (config) => ({
+        recolorables: [
+          { get: () => config.background_color || defaultConfig.background_color, set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
+          { get: () => config.surface_color || defaultConfig.surface_color, set: (v) => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); } },
+          { get: () => config.text_color || defaultConfig.text_color, set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
+          { get: () => config.primary_color || defaultConfig.primary_color, set: (v) => { config.primary_color = v; window.elementSdk.setConfig({ primary_color: v }); } },
+          { get: () => config.secondary_color || defaultConfig.secondary_color, set: (v) => { config.secondary_color = v; window.elementSdk.setConfig({ secondary_color: v }); } }
+        ],
+        borderables: [],
+        fontEditable: { get: () => config.font_family || defaultConfig.font_family, set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); } },
+        fontSizeable: { get: () => config.font_size || defaultConfig.font_size, set: (v) => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); } }
+      }),
+      mapToEditPanelValues: (config) => new Map([
+        ['presentation_title', config.presentation_title || defaultConfig.presentation_title]
+      ])
+    });
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a0a248a60bf2c9ae',t:'MTc4MTE5ODM5OA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
