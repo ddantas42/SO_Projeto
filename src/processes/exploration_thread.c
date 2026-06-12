@@ -41,13 +41,11 @@ void *exploration_thread(void *arg)
 		new_sample = generate_sample(thread_id); // Gera uma nova amostra com dados aleatórios
 		
 		sem_wait(&board->available_slots); // Aguarda até que haja um slot disponível para depósito de amostra
-
 		pthread_mutex_lock(&board->board_mutex);
 		
 		deposit_sample(board, &new_sample); // Deposita a nova amostra no tabuleiro compartilhado
 		
 		pthread_mutex_unlock(&board->board_mutex);
-
 		sem_post(&board->available_samples); // Sinaliza que há uma nova amostra disponível para análise
 
 		logger(DRONE_LOG, thread_id, "Deposited sample of type %d\n", new_sample.item_type);
