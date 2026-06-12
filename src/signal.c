@@ -8,6 +8,12 @@ void sig_handler(int signum)
 			board->stop_signal = 1; // Sinaliza para os processos que eles devem parar
 		if (DEBUG)
 			printf("[DEBUG] SIGINT recebido, stopping processes....\n");
+
+		for (int i = 0; i < NUMBER_OF_ANALYSIS_THREADS; i++)
+			sem_post(&board->available_samples);
+
+		for (int i = 0; i < NUMBER_OF_DRONES_THREADS; i++)
+		    sem_post(&board->available_slots);
 	}
 
 	if (signum == SIGTSTP)

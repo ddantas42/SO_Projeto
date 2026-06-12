@@ -17,6 +17,7 @@
 # include <pthread.h>
 # include <errno.h>
 # include <stdbool.h>
+# include <semaphore.h>
 
 
 # include "macros.h"
@@ -73,6 +74,9 @@ typedef struct s_sharedboard
 	pthread_mutex_t board_mutex; // Mutex para proteger o acesso ao tabuleiro
 	pthread_mutex_t log_mutex; // Mutex para proteger o acesso ao logger
 
+	sem_t available_samples; // Semáforo para contar o número de amostras disponíveis para análise
+	sem_t available_slots; // Semáforo para contar o número de slots disponíveis para depósito de amostras
+	
 	volatile sig_atomic_t stop_signal; // Sinal para indicar que os processos devem parar
 	volatile sig_atomic_t pause_analysis; // Sinal para indicar que a análise deve ser pausada
 

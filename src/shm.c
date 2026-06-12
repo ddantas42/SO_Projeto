@@ -32,6 +32,9 @@ void initialize_sharedboard(t_sharedboard **board)
 	for (int i = 0; i < STORAGE_CAPACITY; i++)
 		init_sample(&(*board)->samples[i]);
 
+	sem_init(&(*board)->available_samples, 1, 0);
+	sem_init(&(*board)->available_slots, 1, STORAGE_CAPACITY);
+
 	if (DEBUG)
 		logger(MAIN_LOG, 0,"Initialize_sharedboard finished | shmid %d | Main pid %d | board %p.\n", shmid, getpid(), (void *)(*board));
 }

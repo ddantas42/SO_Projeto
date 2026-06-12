@@ -32,23 +32,23 @@ void *exploration_thread(void *arg)
 	t_sample				new_sample;
 	int 					thread_id = thread_args->thread_id;
 
+	logger(DRONE_LOG, thread_id, "Starting exploration thread %d...\n", thread_id);
+	
 	while (!board->stop_signal) // Loop principal do processo da frota, continua enquanto o sinal de parada não for acionado
 	{
 		sleep(DRONE_FINDING_TIME); // Simula o tempo entre as coletas de amostras pela frota de drones
 
 		new_sample = generate_sample(thread_id); // Gera uma nova amostra com dados aleatórios
 		
+		sem_wait(&board->available_slots); // Aguarda até que haja um slot disponível para depósito de amostra
+
 		pthread_mutex_lock(&board->board_mutex);
-		if (board->count >= STORAGE_CAPACITY) // thread safety check
-		{
-			pthread_mutex_unlock(&board->board_mutex); // Desbloqueia o mutex antes de continuar
-			logger(DRONE_LOG, thread_id, "Waiting for space on the board...\n");
-			continue ; // O tabuleiro está cheio, continua para a próxima iteração do loop
-		}
 		
 		deposit_sample(board, &new_sample); // Deposita a nova amostra no tabuleiro compartilhado
-		// print_current_board(board); // Imprime o estado atual do tabuleiro para fins de debug
+		
 		pthread_mutex_unlock(&board->board_mutex);
+
+		sem_post(&board->available_samples); // Sinaliza que há uma nova amostra disponível para análise
 
 		logger(DRONE_LOG, thread_id, "Deposited sample of type %d\n", new_sample.item_type);
 		

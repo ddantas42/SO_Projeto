@@ -39,18 +39,16 @@ void *analysis_thread(void *arg)
 	t_sample 		local_sample;
 	int 			thread_id = thread_args->thread_id;
 
+	logger(ANALYSIS_LOG, thread_id, "Starting analysis thread %d...\n", thread_id);
+
 	while (!board->stop_signal) // Loop principal do processo de análise, continua enquanto o sinal de parada não for acionado
 	{
+		sem_wait(&board->available_samples); // Aguarda até que haja uma amostra disponível para análise
 		pthread_mutex_lock(&board->board_mutex);
-		if (board->count <= 0) // thread safety check
-		{
-			pthread_mutex_unlock(&board->board_mutex); // Desbloqueia o mutex antes de continuar
-			logger(ANALYSIS_LOG, thread_id, "Waiting for samples...\n");
-			sleep(1); // Evita que o processo de análise consuma 100% da CPU quando não há amostras para analisar
-			continue; // Não há amostras para analisar, continua para a próxima iteração do loop
-		}
+
 		local_sample = get_sample(board); // Obtém uma amostra do tabuleiro para análise
 		pthread_mutex_unlock(&board->board_mutex);
+		sem_post(&board->available_slots); // Sinaliza que há um slot disponível para depósito de amostra
 
 		analyse_sample(&local_sample, thread_id);
 		append_sample_csv(&local_sample);
