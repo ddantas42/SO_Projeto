@@ -46,7 +46,7 @@ void *exploration_thread(void *arg)
 		deposit_sample(board, &new_sample); // Deposita a nova amostra no tabuleiro compartilhado
 		
 		pthread_mutex_unlock(&board->board_mutex);
-		sem_post(&board->available_samples); // Sinaliza que há uma nova amostra disponível para análise
+		sem_post(&board->available_samples); // Sinaliza que há uma nova amo	stra disponível para análise
 
 		logger(DRONE_LOG, thread_id, "Deposited sample of type %d\n", new_sample.item_type);
 		
